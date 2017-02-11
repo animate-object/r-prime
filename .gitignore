@@ -96,3 +96,4 @@ ENV/
 .idea/modules.xml
 .idea/r-prime.iml
 .idea/workspace.xml
+.idea
