@@ -100,7 +100,7 @@ Requirements.txt is a file that specifies project requirements. You can see it i
 
 Pip should start installing all of the project dependencies including numpy and tensorflow.
 
-##### Tell PyCharm about your virtual environment
+### Tell PyCharm about your virtual environment
 One last step to make it easy to run python files in the app.
 
 With the project open in PyCharm, go to file > settings > Project > Project Interpreter
