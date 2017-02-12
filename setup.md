@@ -44,17 +44,18 @@ The easiest way to install python libraries is with `pip`. It comes with your py
 Unfortunately the version that came packaged with python might be a little out of date. Not a problem.
 
 Open command prompt **running as administrator** and run this command:
-`python -m pip install --upgrade pip`
+
+`> python -m pip install --upgrade pip`
 
 (python -m says "this is a python script")
 
 While we're upgrading, let's also upgrade setuptools
 
-`python -m pip install --upgrade setuptools`
+`> python -m pip install --upgrade setuptools`
 
 And virtualenv (we'll want it later)
 
-`python -m pip install virtualenv`
+`> python -m pip install virtualenv`
 
 These packages will now be upgraded/installed globally across your entire system.
 
@@ -91,12 +92,14 @@ run the following commands:
 
 `> virtualenv venv` -- sets up a virtualenv in a folder called `venv`
 
-`> venv\Scripts\activate.bat` -- starts running the virtual environment
+`> venv\Scripts\activate.bat` -- starts running the virtual environment.
 
 Your prompt should now have `(venv)` in front of it. Run:
 
-`pip install -r requirements.txt` 
+`> pip install -r requirements.txt`
+
 Requirements.txt is a file that specifies project requirements. You can see it in the project root directory.
+While in the virtual environment, you don't need to preface python commands with `python -m`
 
 Pip should start installing all of the project dependencies including numpy and tensorflow.
 
