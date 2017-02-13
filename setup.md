@@ -108,7 +108,7 @@ One last step to make it easy to run python files in the app.
 
 With the project open in PyCharm, go to file > settings > Project > Project Interpreter
 
-From there selec the drop down menu and set the project interpreter to 
+From there select the drop down menu and set the project interpreter to
 `3.5.2 virtualenv at C:\<your project path>\r-prime\venv`. You should see the list of installed
 packages update to include, among other things TensorFlow and NumPy.
 
