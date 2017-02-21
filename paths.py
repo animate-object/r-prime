@@ -7,7 +7,7 @@ APP_ROOT = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.join(APP_ROOT, 'data')
 
 # Directory where lyric sets will be stored.
-LYRICS_SETS = os.path.join(DATA_DIR, 'lyrics-sets')
+LYRICS_SETS = os.path.join(DATA_DIR, 'lyric-sets')
 
 # Directory for app resources (config etc.)
 APP_RESOURCES = os.path.join(APP_ROOT, *['app', 'resources'])
