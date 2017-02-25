@@ -99,5 +99,5 @@ def _print_dicts(term_dict, reverse_dict):
         print("r_term | {:<20}: {}".format(i, word_mapped_to_i))
 
 # running tests...
-# test_reader_one_file(sample_song="express-yourself.txt")
-test_batch_read("nas-discography")
+test_reader_one_file(sample_song="express-yourself.txt")
+#test_batch_read("nas-discography")
