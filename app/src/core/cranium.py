@@ -8,8 +8,10 @@ class Cranium:
         self._verify(model)
         self.model = model
 
-    def train_model(self, step_data):
-        return self.model.train(step_data)
+    def train_model(self, data, params=None):
+        if params:
+            return self.model.train(data, params)
+        return self.model.train(data)
 
     def spit(self, include_metadata=False, **kwargs):
         to_file, path = kwargs.get('to_file'), kwargs.get('file_path')
@@ -18,11 +20,11 @@ class Cranium:
                 raise TypeError("Cannot write to file. Specify output locale as 'file_path'")
             else:
                 output = self.model.spit(include_metadata)
-                pass  # raise missing parameter exception on missing path param
+                pass  # TODO implement saving to file.
 
         else:
+            # write nn output to console
             print(self.model.spit(include_metadata))
-            pass  # write nn output to console
 
     def save_state(self, path):
         state = self.model.get_state()
