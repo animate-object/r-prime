@@ -9,7 +9,7 @@ from tflearn.data_utils import *
 
 from paths import DATA_DIR
 
-shakespeare_path = os.path.join(DATA_DIR, *["shakespeare", "shakespeare.txt"])
+shakespeare_path = os.path.join(DATA_DIR, *["shakespeare", "medshakespeare.txt"])
 char_idx_file = 'char_idx.pickle'
 
 maxlen = 25
