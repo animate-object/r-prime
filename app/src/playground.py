@@ -1,7 +1,7 @@
 from app.src.core.cranium import Cranium
 from app.src.core.models.lstm_rnn import LstmRnn
 
-from app.src.file.file_utils import song_to_sequences
+from app.src.file.file_utils import song_to_character_sequences
 from paths import LYRICS_SETS, DATA_DIR
 
 import os
@@ -19,7 +19,7 @@ output_path = os.path.join(DATA_DIR, "nn-training-output\\")
 if not os.path.isdir(output_path):
     os.mkdir(output_path)
 
-X, Y, chr_idx, metadata = song_to_sequences(path)
+X, Y, chr_idx, metadata = song_to_character_sequences(path)
 data = {'X': X, 'Y': Y}
 
 
