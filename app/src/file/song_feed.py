@@ -17,11 +17,14 @@ from paths import LYRICS_SETS
 
 import string
 
+
 class SongFeed:
     def __init__(self, sequence_function=song_to_character_sequences):
         self.file_parser_function = sequence_function
         self.songs = None
         self.artists = set()
+
+        self.cumulative_character_count = 0
 
         # the cumulative character index of all songs in the data set
         self.character_index = None
