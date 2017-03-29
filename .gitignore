@@ -97,3 +97,6 @@ ENV/
 .idea/r-prime.iml
 .idea/workspace.xml
 .idea
+
+# Data
+data/nn-training-output/*
