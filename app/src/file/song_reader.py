@@ -2,7 +2,9 @@ from app.src.domain.song import Song
 from paths import DATA_DIR
 import os.path
 
-
+# FIXME not sure this class has a place in the current app architecture
+# if it does, it will be leveraging the reader function in file utils to store songs...
+# don't use this class for now
 class SongReader:
     """
     Handles file input around reading in lyric sets and while parsing/sanitizing data, compiles initial
@@ -63,11 +65,80 @@ class SongReader:
             .strip("'\t\r\n")  # we strip ' here along with whitespace to avoid removing punctuation *in* the word
 
 
+def tokenize_text(text, seq_sanitize_tbl=None, tokenize_fn=None):
+    word_san = str.maketrans("", "", "-")
+
+    # TODO remove duplicated code
+    def sanitize_word(word):
+        return word.translate(word_san)\
+            .lower()\
+            .strip("'")  # we strip ' here along with whitespace to avoid removing punctuation *in* the word
+
+    seq_sanitize_tbl = seq_sanitize_tbl if seq_sanitize_tbl else str.maketrans("", "", "{}*:!.,<>&(),?&;\"")
+    tokenize = tokenize_fn if tokenize_fn else sanitize_word
+    text = text.translate(seq_sanitize_tbl)
+    tokenized = []
+
+    for word in text.split(' '):
+        word = tokenize(word)
+        newline = word.find('\n') + 1
+        if newline > 0:
+            word_1 = word[:newline]
+            word_2 = word[newline:]
+            tokenized += [word_1, word_2]
+        else:
+            tokenized.append(word)
+
+    return tokenized
+
+
+def word_sequence_to_X_Y(text, subseq_len):
+    """
+    :param text: your text... will be sanitized and tokenized with default functions if none are provided
+    :param subseq_len: how many words long do you want each X sequence to be (at maximum)... should probably be shorter
+    than the total length of your text.
+
+    :return: (X, Y) where
+    X is an array of x_n where each x is an array of consecutive words from the sequence starting at n
+    Y is an array of y_n where each y is the word that follows the sub_sequence x from the text
+        There is a one to one correspondence of X -> Y e.g.
+        Text = "life's a bitch and then you die . . . " subseq_len = 4
+        x_1 -> y_1 || X[1] -> Y[1]: ["life's", "a", "bitch", "and"] -> "then"
+        x_2 -> y_2 || X[2] -> Y[2]: ["a", "bitch", "and", "then"] -> "you"
+        . . . etc
+        """
+    text = tokenize_text(text=text)
+    X = []
+    Y = []
+
+    for x_start in range(0, len(text) - subseq_len):
+        y_idx = x_start + subseq_len
+        X.append(text[x_start:y_idx])
+        Y.append(text[y_idx])
+    return X, Y
+
+
+def char_sequence_to_X_Y(text, subseq_len):
+    """ X is an array of x_n where each x is a string of consecutive letters from the sequence starting at n
+        Y is an array of y_n where each y is the character that follows the string x from the sequence
+        :param text:
+        :param subseq_len:
+    """
+    X = []
+    Y = []
+
+    for x_start in range(0, len(text) - subseq_len):
+        y_idx = x_start + subseq_len
+        X.append(text[x_start:y_idx])
+        Y.append(text[y_idx])
+    return X, Y
+
 # ------------------------------------------------------------------
 # MANUAL TEST FUNCTIONS
 # ------------------------------------------------------------------
 
 # TODO big one -- we should probably figure out python unit testing...
+
 
 def test_reader_one_file(sample_dir="", sample_song=""):
     reader = SongReader()
@@ -99,5 +170,5 @@ def _print_dicts(term_dict, reverse_dict):
         print("r_term | {:<20}: {}".format(i, word_mapped_to_i))
 
 # running tests...
-test_reader_one_file(sample_song="express-yourself.txt")
-#test_batch_read("nas-discography")
+# test_reader_one_file(sample_song="express-yourself.txt")
+# test_batch_read("nas-discography")
