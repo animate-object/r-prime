@@ -41,6 +41,7 @@ class Cranium:
 
         if not_implemented:
             missing_methods = ', '.join(not_implemented)
+            # this should probably be a TypeError
             raise NotImplementedError(
                 "Submitted model of type {} does not implement required method(s): {}.".format(
                     type(model), missing_methods
