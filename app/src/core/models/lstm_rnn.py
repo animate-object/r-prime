@@ -1,10 +1,11 @@
 import tflearn
+from paths import DATA_DIR
 from tflearn import BasicLSTMCell
 import tensorflow as tf
 
 
 class LstmRnn:
-    def __init__(self, max_len, char_idx, checkpoint_path=None, default_seed=None):
+    def __init__(self, max_len, char_idx, checkpoint_path=DATA_DIR+'/models-checkpoint/', default_seed=None):
         g = tflearn.input_data([None, max_len, len(char_idx)])
         g = tflearn.lstm(g, 512, return_seq=True)
         g = tflearn.dropout(g, 0.5)
