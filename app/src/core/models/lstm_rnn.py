@@ -4,8 +4,8 @@ import tensorflow as tf
 
 
 class LstmRnn:
-    def __init__(self, max_len, char_idx, checkpoint_path=None, default_seed=None):
-        g = tflearn.input_data([None, max_len, len(char_idx)])
+    def __init__(self, char_idx, seq_max_len=25, checkpoint_path=None, default_seed=None):
+        g = tflearn.input_data([None, seq_max_len, len(char_idx)])
         g = tflearn.lstm(g, 512, return_seq=True)
         g = tflearn.dropout(g, 0.5)
         g = tflearn.lstm(g, 512, return_seq=True)

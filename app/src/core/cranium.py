@@ -4,7 +4,12 @@ import inspect
 class Cranium:
     must_implement = {'__init__', 'train', 'spit', 'get_state', 'load_state'}
 
-    def __init__(self, model):
+    def __init__(self, new_model=None):
+        self.model = None
+        if new_model:
+            self.init_model(new_model)
+
+    def init_model(self, model):
         self._verify(model)
         self.model = model
 
