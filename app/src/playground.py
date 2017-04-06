@@ -1,7 +1,7 @@
 from app.src.core.cranium import Cranium
 from app.src.core.models.lstm_rnn import LstmRnn
 
-from app.src.file.file_utils import song_to_character_sequences
+from app.src.file.file_utils import read_song
 from app.src.file.song_feed import SongFeed
 from paths import LYRICS_SETS, DATA_DIR
 
@@ -15,24 +15,24 @@ You could also plug a different model into the cranium, if you wanted to try som
 """
 
 nas_path = os.path.join(LYRICS_SETS, "nas-discography")
+sample_path = os.path.join(LYRICS_SETS, "sample-lyric-set")
 output_path = os.path.join(DATA_DIR, "nn-training-output\\")
+l_a_b = os.path.join(sample_path, "life's-a-bitch.txt")
 
 if not os.path.isdir(output_path):
     os.mkdir(output_path)
 
-feed = SongFeed.from_lyrics_directory(nas_path)
+# feed = SongFeed.from_lyrics_directory(sample_path)
+feed = SongFeed.from_lyrics_files(l_a_b)
+
+m = LstmRnn(feed.character_index, seq_max_len=25)
+c = Cranium(new_model=m)
+
+epochs = 10
 
 
-m = LstmRnn(25, feed.character_index, checkpoint_path=output_path)
-c = Cranium(model=m)
+X, Y = feed.get_seq_data()
+data = {"X": X, "Y":Y}
+c.train_model(data, params={'epochs': epochs, 'batch_size': 128})
 
-for i, song in enumerate(feed.get_training_feed(1)):
-
-    print("Processing song {} of {}: {} by {}".format(
-        i, len(feed.songs), song.title, song.artist
-    ))
-
-    data = {'X': song.X, 'Y': song.Y}
-    c.train_model(data, params=dict(epochs=1, batch_size=256))
-
-c.spit(temp=0.5)
+c.spit(seq_len=2000, temp=0.5)
