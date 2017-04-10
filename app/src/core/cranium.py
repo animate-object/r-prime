@@ -29,15 +29,14 @@ class Cranium:
 
         else:
             # write nn output to console
-            print(self.model.spit(include_metadata))
+            print(self.model.spit(include_metadata, **kwargs))
 
     def save_state(self, path):
-        state = self.model.get_state()
-        pass  # save state to path
+        self.model.get_state().save(path)
+
 
     def load_state(self, path):
-        state = None  # retrieve this from file at path
-        self.model.load_state(state)
+        self.model.load_state(path)
 
     def _verify(self, model):
         method_tups = inspect.getmembers(model, inspect.ismethod)
