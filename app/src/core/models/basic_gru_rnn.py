@@ -1,16 +1,14 @@
 import tflearn
-from tflearn import BasicLSTMCell
-import tensorflow as tf
 
 
 class LstmRnn:
     def __init__(self, char_idx, seq_max_len=25, checkpoint_path=None, default_seed=None):
         g = tflearn.input_data([None, seq_max_len, len(char_idx)])
-        g = tflearn.lstm(g, 512, return_seq=True)
+        g = tflearn.gru(g, 512, return_seq=True)
         g = tflearn.dropout(g, 0.5)
-        g = tflearn.lstm(g, 512, return_seq=True)
+        g = tflearn.gru(g, 512, return_seq=True)
         g = tflearn.dropout(g, 0.5)
-        g = tflearn.lstm(g, 512)
+        g = tflearn.gru(g, 512)
         g = tflearn.dropout(g, 0.5)
         g = tflearn.fully_connected(g, len(char_idx), activation='softmax')
         g = tflearn.regression(g, optimizer='adam', loss='categorical_crossentropy', learning_rate=0.001)
