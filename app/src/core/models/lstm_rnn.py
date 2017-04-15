@@ -1,4 +1,5 @@
 import tflearn
+from paths import DATA_DIR
 from tflearn import BasicLSTMCell
 import tensorflow as tf
 
