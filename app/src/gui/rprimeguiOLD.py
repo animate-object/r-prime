@@ -12,30 +12,53 @@ class RprimeGui(tk.Frame):
     def __init__(self, master=None):
         super().__init__(master)
         self.pack()
+
+        #Create the pieces of the interface
         self.create_widgets()
 
+        #Instantiate the Cranium
         self.cranium = Cranium()
 
+        #Song Feed variable
         self.feed = None
 
+    """
+    Creates all of the things inside the window
+    """
     def create_widgets(self):
+
         #Insert Model into Cranium Object Button
         self.insert_model_btn = tk.Button(self, text="Insert Model", command=self.insert_model)
-        self.insert_model_btn.pack(side="top")
+        self.insert_model_btn.pack(side="left")
 
         #Train Model
         self.train_model_btn = tk.Button(self, text="Train Model", command=self.train_model_gui)
-        self.train_model_btn.pack(side="top")
+        self.train_model_btn.pack(side="left")
 
         #Spit Lyrics
         self.spit_btn = tk.Button(self, text="Spit", command=self.spit_gui)
-        self.spit_btn.pack(side="top")
+        self.spit_btn.pack(side="left")
+
+        #Save State
+        self.save_btn = tk.Button(self, text="Save Model", command=self.save_state_gui)
+        self.save_btn.pack(side="left")
+
+        #Load State
+        self.load_btn = tk.Button(self, text="Load Model", command=self.load_state_gui)
+        self.load_btn.pack(side="left")
+
+        #Text Window
+        self.output_window = tk.Text(self, state="disabled")
+        self.output_window.pack(side="right")
 
         #Exit the program
         self.quit = tk.Button(self, text="QUIT", fg="red",
                               command=root.destroy)
         self.quit.pack(side="bottom")
 
+    """
+    Inserts a model into the Cranium object
+    """
     def insert_model(self):
         #model = a_model
         #cranium.init_model(model)
@@ -44,7 +67,9 @@ class RprimeGui(tk.Frame):
         model = LstmRnn(char_idx)
         self.cranium.init_model(model)
         print("Model Inserted into Cranium")
-
+    """
+    Trains the current model
+    """
     def train_model_gui(self):
         print("Starting Train Model")
         self._build_feed()
@@ -60,11 +85,22 @@ class RprimeGui(tk.Frame):
         self.feed = SongFeed.from_lyrics_directory(os.path.join(
             LYRICS_SETS, file_path
         ))
-
+    """
+    Generates the output text
+    """
     def spit_gui(self):
+        print("Getting Output")
         output = self.cranium.spit()
+        ##########self.output_window.insert(self,1.0,"Some Text")
         print(output)
 
+    def save_state_gui(self, path):
+        pass
+
+    def load_state_gui(self, path):
+        pass
+
 root = tk.Tk()
+root.geometry("800x500+300+100")
 app = RprimeGui(master=root)
 app.mainloop()
