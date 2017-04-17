@@ -19,17 +19,7 @@ class Cranium:
         return self.model.train(data)
 
     def spit(self, include_metadata=False, **kwargs):
-        to_file, path = kwargs.get('to_file'), kwargs.get('file_path')
-        if to_file:
-            if not path:
-                raise TypeError("Cannot write to file. Specify output locale as 'file_path'")
-            else:
-                output = self.model.spit(include_metadata)
-                pass  # TODO implement saving to file.
-
-        else:
-            # write nn output to console
-            print(self.model.spit(include_metadata, **kwargs))
+        return self.model.spit(include_metadata, **kwargs)
 
     def save_state(self, path):
         self.model.get_state().save(path)

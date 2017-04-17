@@ -24,7 +24,7 @@ class LstmRnn:
 
         self.default_seed = default_seed if default_seed else "life in the hood"
 
-    def train(self, data, params):
+    def train(self, data, params=dict()):
         """
         by default run for one epochs over the training data in batches of 128
         """
