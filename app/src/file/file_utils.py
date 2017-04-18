@@ -4,7 +4,7 @@ from re import sub as regex_sub
 # TODO make configurable. Copied code lives in song_feed char index method
 
 
-def read_song(path):
+def read_song(path, strip_newlines=False):
     """
     Get metadata from song file, and remove unicode and non printables from the song text.
     :return: the song test and a map of song metadata
@@ -25,17 +25,17 @@ def read_song(path):
                 prop_name = line_parts[0]
                 prop_val = " ".join(line_parts[1:])
                 metadata[prop_name] = prop_val
+            elif strip_newlines and line.startswith('\n'):
+                continue
             else:
                 song_text += _remove_unicode(line)
 
     return song_text, metadata
 
+def read_strip_newlines(path):
+    return read_song(path, True)
 
 def _remove_unicode(string):
     return regex_sub(r'[^\x00-\x7F]+', '', string)
 
-# X, Y, char_idx, metadata = song_to_sequences(os.path.join(
-#     LYRICS_SETS, "nas-discography", "2nd-childhood.txt"
-# ))
-#
-# # pprint.pprint(metadata)
+

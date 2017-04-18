@@ -24,7 +24,6 @@ class Cranium:
     def save_state(self, path):
         self.model.get_state().save(path)
 
-
     def load_state(self, path):
         self.model.load_state(path)
 
@@ -36,7 +35,7 @@ class Cranium:
         if not_implemented:
             missing_methods = ', '.join(not_implemented)
             # this should probably be a TypeError
-            raise NotImplementedError(
+            raise TypeError(
                 "Submitted model of type {} does not implement required method(s): {}.".format(
                     type(model), missing_methods
                 )
@@ -45,25 +44,25 @@ class Cranium:
 # ------------------------------------------------------------------
 # MANUAL TEST FUNCTIONS
 # ------------------------------------------------------------------
-
-
-class TestVerifyNN:
-    def __init__(self):
-        pass
-
-    def train(self, step_data):
-        pass
-
-    def spit(self, include_metadata=False):
-        pass
-
-    def get_state(self, state):
-        pass
-
-    def load_state(self, state):
-        pass
-
-
-if __name__ == '__main__':
-    t = TestVerifyNN()
-    c = Cranium(t)
+#
+#
+# class TestVerifyNN:
+#     def __init__(self):
+#         pass
+#
+#     def train(self, step_data):
+#         pass
+#
+#     def spit(self, include_metadata=False):
+#         pass
+#
+#     def get_state(self, state):
+#         pass
+#
+#     def load_state(self, state):
+#         pass
+#
+#
+# if __name__ == '__main__':
+#     t = TestVerifyNN()
+#     c = Cranium(t)
