@@ -1,5 +1,6 @@
 import sqlite3 as sql
 import os.path
+from string import printable
 
 from paths import DATA_DIR
 
@@ -23,7 +24,7 @@ def word_like_query(non_word,max_results=10):
     result = cursor.fetchmany(max_results)
     conn.commit()
     conn.close()
-    return result
+    return [tup[0] for tup in result]
 
 
 def init_word_db():
@@ -46,7 +47,8 @@ def populate_word_db():
         for line in words:
             word = str(line.strip('\n'))
             try:
-                if word:
+                # right now we're not going to mess with non ascii words
+                if word and _is_ascii(word):
                     # print('inserting word {}'.format(word))
                     cursor.execute('''INSERT INTO words VALUES (?)''', (word,))
             except sql.IntegrityError as e:
@@ -66,14 +68,18 @@ def what_is_even_in_here():
     return result
 
 
+def _is_ascii(word):
+    for letter in word:
+        if letter not in printable:
+            return False
+    return True
+
+
 def db_start_up():
     init_word_db()
     populate_word_db()
-    what_is_even_in_here()
 
 
 # db_start_up()
-# what_is_even_in_here()
-#
-# print(is_word_query('a'))
-print(word_like_query('trug'))
+
+print(word_like_query('bc'))

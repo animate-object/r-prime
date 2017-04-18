@@ -50,6 +50,7 @@ expletives_light = {
 
 punctuation = [',','"',';','.','\n']
 
+
 def filter(text, filter_dict=expletives_light):
     new_text = ""
     stripped_word = ""
@@ -64,14 +65,18 @@ def filter(text, filter_dict=expletives_light):
             new_text+=' '
     return new_text
 
+
 def filter_strict(text):
     return filter(text, filter_dict=expletives_full)
 
 def main():
-    aText = "Life's a bitch, and then you die\n Fuck who's the baddest; a person's status depends on salary nigga "
+
+    aText = """nigga nigga cunt bitch fuck ass dick
+            niggas front fucking hell bitch
+            """
 
     newText = filter_strict(aText)
 
     print(newText)
 
-#main()
+main()

@@ -2,7 +2,7 @@ import tflearn
 
 
 class ConfigurableLstmRnn:
-    def __init__(self, char_idx, seq_max_len=25, checkpoint_path=None, default_seed=None, **kwargs):
+    def __init__(self, char_idx, seq_max_len=25, checkpoint_path=None, **kwargs):
 
         g = self._build_model(seq_max_len, len(char_idx), **kwargs)
 
@@ -11,8 +11,6 @@ class ConfigurableLstmRnn:
             clip_gradients=5.0,
             checkpoint_path=checkpoint_path
         )
-
-        self.default_seed = default_seed if default_seed else "life in the hood"
 
     def _build_model(self, seq_max_len, len_char_idx, **kwargs):
         hidden_layer_sizes = kwargs['hidden_layer_sizes'] if 'hidden_layer_sizes' in kwargs else [512, 512]
