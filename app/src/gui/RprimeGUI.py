@@ -14,7 +14,8 @@ class RprimeGUI:
     def __init__(self, master):
         #Class Variables
         self.cranium = Cranium()
-        self.nn_selection = IntVar()
+        self.nn_selection = StringVar()
+        self.nn_selection.set("LSTM RNN")
         self.train_path = StringVar()
 
         """GUI Widgets"""
@@ -42,15 +43,13 @@ class RprimeGUI:
         sl_frame = LabelFrame(left_frame, text = "Save and Load")
         sl_frame.pack(side=TOP)
 
-        #Radio buttons for selecting NNs
-        Radiobutton(select_model_frame,text="LSTM RNN", variable=self.nn_selection, value=1,
-                    command=self.rbtest).pack(side=TOP)
-        Radiobutton(select_model_frame, text="Hot Dog RNN", variable=self.nn_selection, value=2,
-                    command=self.rbtest).pack(side=TOP)
-        Radiobutton(select_model_frame, text="Jumbo Dog RNN", variable=self.nn_selection, value=3,
-                    command=self.rbtest).pack(side=TOP)
-        Radiobutton(select_model_frame, text="Hamburger RNN", variable=self.nn_selection, value=4,
-                    command=self.rbtest).pack(side=TOP)
+        #Drop Down Menu
+        self.optionmenu = OptionMenu(select_model_frame, self.nn_selection,
+                                     "LSTM RNN",
+                                     "Hot Dog RNN",
+                                     "Jumbo Dog RNN",
+                                     "Hamburger RNN")
+        self.optionmenu.pack(side=TOP)
 
         #Button to insert model into cranium
         self.insert_model_button = Button(select_model_frame, text="Insert Model", command=self.insert_model)
@@ -98,19 +97,19 @@ class RprimeGUI:
     def insert_model(self):
         print("Inserting Model")
         char_idx = create_char_index()
-        if(self.nn_selection.get()==1):
+        if(self.nn_selection.get()=="LSTM RNN"):
             model = LstmRnn(char_idx)
             self.cranium.init_model(model)
             print("LSTM RNN Selected")
-        elif(self.nn_selection.get()==2):
+        elif(self.nn_selection.get()=="Hot Dog RNN"):
             model = HotDogRnn(char_idx)
             self.cranium.init_model(model)
             print("Hot Dog RNN Selected")
-        elif (self.nn_selection.get() == 3):
+        elif (self.nn_selection.get() == "Jumbo Dog RNN"):
             model = JumboDogRnn(char_idx)
             self.cranium.init_model(model)
             print("Jumbo Dog RNN Selected")
-        elif (self.nn_selection.get() == 4):
+        elif (self.nn_selection.get() == "Hamburger RNN"):
             model = HamburgerRnn(char_idx)
             self.cranium.init_model(model)
             print("Hamburger RNN Selected")

@@ -37,7 +37,7 @@ class ConfigurableLstmRnn:
 
         return g
 
-    def train(self, data, params):
+    def train(self, data, params=dict()):
         """
         by default run for one epochs over the training data in batches of 128
         """
