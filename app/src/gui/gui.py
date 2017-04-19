@@ -12,7 +12,8 @@ from app.src.file.song_feed import SongFeed
 from app.src.domain.default_char_index import *
 
 
-NN_OPTIONS = {"LSTM RNN":LstmRnn, "Hot Dog RNN":HotDogRnn, "Jumbo Dog RNN":JumboDogRnn, "Hamburger RNN":HamburgerRnn}
+NN_OPTIONS = {"LSTM RNN":LstmRnn, "Hot Dog RNN":HotDogRnn, "Jumbo Dog RNN":JumboDogRnn, "Hamburger RNN":HamburgerRnn,
+              "Pancake RNN":PancakeRnn, "Pizza Dough RNN":PizzaDoughRnn}
 
 class Gui(tk.Frame):
     def __init__(self, master=None):
@@ -88,52 +89,17 @@ class Gui(tk.Frame):
         else:
             self.createEndWidgets(x, y, b)
 
-    ###DONE###
     def createModelSelection(self, x, y, b):
 
         self.modelStrVar.set("Choose RNN")
         self.optionmenu = tk.OptionMenu(self, self.modelStrVar, *NN_OPTIONS.keys())
         self.optionmenu.place(x=x[1],y=y[b])
 
-        self.modelLabel = tk.Label(self, text="Select a RNN")
+        self.modelLabel = tk.Label(self, text="Select RNN")
         self.modelLabel.place(x=x[0], y=y[b])
         b+=1
         self.loadButton = tk.Button(self, text="Load", command=self.load_model, width=10)
         self.loadButton.place(x=x[0], y=y[b])
-
-        """
-        # Row of models
-        self.lstmRnnButton = tk.Radiobutton(self, text="Lstm", variable=self.modelVar, value=0,
-                                           command=self.changeModel)
-        self.lstmRnnButton.place(x=x[1], y=y[b])
-        self.hotDogRnnButton = tk.Radiobutton(self, text="HotDog", variable=self.modelVar, value=1,
-                                             command=self.changeModel)
-        self.hotDogRnnButton.place(x=x[2], y=y[b])
-        self.jumboDogRnnButton = tk.Radiobutton(self, text="JumboDog", variable=self.modelVar, value=2,
-                                               command=self.changeModel)
-        self.jumboDogRnnButton.place(x=x[3], y=y[b])
-        b+= 1
-        # New row of models
-        self.hamburgerRnnButton = tk.Radiobutton(self, text="Hamburger", variable=self.modelVar, value=3,
-                                                command=self.changeModel)
-        self.hamburgerRnnButton.place(x=x[1], y=y[b])
-        self.pancakeRnnButton = tk.Radiobutton(self, text="Pancake", variable=self.modelVar, value=4,
-                                                 command=self.changeModel)
-        self.pancakeRnnButton.place(x=x[2], y=y[b])
-        self.pizzaDoughRnnButton = tk.Radiobutton(self, text="PizzaDough", variable=self.modelVar, value=5,
-                                               command=self.changeModel)
-        self.pizzaDoughRnnButton.place(x=x[3], y=y[b])
-        b += 1
-        
-        self.widgets.append(self.modelLabel)
-        self.widgets.append(self.loadButton)
-        self.widgets.append(self.lstmRnnButton)
-        self.widgets.append(self.hotDogRnnButton)
-        self.widgets.append(self.jumboDogRnnButton)
-        self.widgets.append(self.hamburgerRnnButton)
-        self.widgets.append(self.pancakeRnnButton)
-        self.widgets.append(self.pizzaDoughRnnButton)
-        """
 
         self.widgets.append(self.loadButton)
         self.widgets.append(self.optionmenu)
@@ -271,6 +237,7 @@ class Gui(tk.Frame):
         print(self.fire)
 
     def save_fire(self):
+        print("Saving Output")
         fileExists = True
         out_file = None
         spitSaveNum = 1
@@ -288,8 +255,10 @@ class Gui(tk.Frame):
                     fileExists = False
             spitSaveNum+=1
 
+        print("Output Saved")
 
     def save_model(self):
+        print("Saving Model")
         modelSaveNum = 1
         pathExists = True
         output_path = None
