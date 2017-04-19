@@ -59,7 +59,7 @@ class Gui(tk.Frame):
         if (self.select == 0):
             self.createModelSelection(x, y, b)
         else:
-            self.createEndWidgets(x, y, b)
+            self.createPreTrainedModelWidgets(x, y, b)
 
     #Create Initial Widgets that are never deleted and re-created
     def createInitWidgets(self, x, y):
@@ -75,20 +75,16 @@ class Gui(tk.Frame):
         self.outputWindow = tk.Text(self, width=55, height=20, wrap=tk.WORD)
         self.outputWindow.place(x=x[4], y=y[b + 1])
 
-    def createBodyWidgets(self, x, y, b):
-        # Row - Load button + Entry
-        #self.loadButton = tk.Button(self, text="Load", command=self.insert_model, width=10)
-        #self.loadButton.place(x=x[0], y=y[b])
-        self.pathEntry = tk.Entry(self, width=25)
-        self.pathEntry.place(x=x[1], y=y[b])
-        b += 1
 
-        self.widgets.append(self.pathEntry)
+    def createPreTrainedModelWidgets(self, x, y, b):
+        self.loadButton2 = tk.Button(self, text="Load", command=self.load_trained_model, width=9)
+        self.loadButton2.place(x=x[0], y=y[b])
+        b+=1
 
-        if (self.select == 0):
-            self.createModelSelection(x, y, b)
-        else:
-            self.createEndWidgets(x, y, b)
+        # HAVE PRE TRAINED MODELS HERE!!!
+
+        self.widgets.append(self.loadButton2)
+        self.createSpitWidgets(x, y, b)
 
     def createModelSelection(self, x, y, b):
         b += 1
@@ -269,6 +265,7 @@ class Gui(tk.Frame):
         self.refresh()
         print(self.fire)
 
+
     def save_fire(self):
         print("Saving Output")
         fileExists = True
@@ -310,6 +307,11 @@ class Gui(tk.Frame):
         self.cranium.save_state(output_path)
         print("Model Saved")
 
+
+
+    #LOAD PRE TRAINED MODEL
+    def load_trained_model(self):
+        None
 
     def refresh(self):
         for i in range(len(self.widgets)):
