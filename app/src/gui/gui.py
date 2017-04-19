@@ -1,4 +1,5 @@
 import tkinter as tk
+import tensorflow as tf
 
 import os.path
 from paths import *
@@ -24,9 +25,13 @@ class Gui(tk.Frame):
         self.fire = None
         self.model_inserted = False
         self.startVar = tk.IntVar()
-        #self.modelVar = tk.IntVar()
         self.modelStrVar = tk.StringVar()
         self.tempVar = tk.DoubleVar()
+
+        #For creating new directories for saving models
+        #self.modelSaveNum = 1
+
+        #self.spitSaveNum = 1
 
         #This array is for any widget that doesn't have a fixed value
         self.widgets = []
@@ -217,6 +222,7 @@ class Gui(tk.Frame):
 
     # Insert Model helper method
     def load_model(self):
+        tf.reset_default_graph()
         self.insert_model(self.modelStrVar.get())
 
     def insert_model(self, choice=None):
@@ -226,7 +232,6 @@ class Gui(tk.Frame):
         char_idx = create_char_index()
         model = NN_OPTIONS[choice]
         self.cranium.init_model(model(char_idx))
-
         print("Model Inserted into Cranium")
 
     def train_model_gui(self):
@@ -263,10 +268,44 @@ class Gui(tk.Frame):
         print(self.fire)
 
     def save_fire(self):
-        None
+        fileExists = True
+        out_file = None
+        spitSaveNum = 1
+        fullPath = None
+
+        output_path = os.path.join(DATA_DIR, "spit-output\\")
+        if not os.path.isdir(output_path):
+            os.mkdir(output_path)
+
+        while(fileExists):
+            out_file = os.path.join(output_path, "output"+str(spitSaveNum)+".txt")
+            if not os.path.isfile(out_file):
+                with open(out_file,"w") as fo:
+                    fo.write(self.fire)
+                    fileExists = False
+            spitSaveNum+=1
+
 
     def save_model(self):
-        None
+        modelSaveNum = 1
+        pathExists = True
+        output_path = None
+
+        output_dir = os.path.join(DATA_DIR, "nn-training-output\\")
+        if not os.path.isdir(output_dir):
+            os.mkdir(output_dir)
+
+        while(pathExists):
+            output_path = os.path.join(DATA_DIR, "nn-training-output\\",
+                                       self.modelStrVar.get()+"-"+str(modelSaveNum)+"\\")
+            if not os.path.isdir(output_path):
+                os.mkdir(output_path)
+                pathExists = False
+            modelSaveNum+=1
+
+        print("Saving model to: "+self.modelStrVar.get()+"-"+str(modelSaveNum-1))
+        self.cranium.save_state(output_path)
+        print("Model Saved")
 
 root = tk.Tk()
 root.geometry("800x400+300+300")
