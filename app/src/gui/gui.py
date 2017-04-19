@@ -74,8 +74,15 @@ class Gui(tk.Frame):
         self.outputWindow = tk.Text(self, width=55, height=20, wrap=tk.WORD)
         self.outputWindow.place(x=x[4], y=y[b + 1])
 
+
     def createPreTrainedModelWidgets(self, x, y, b):
+        self.loadButton2 = tk.Button(self, text="Load", command=self.load_trained_model, width=9)
+        self.loadButton2.place(x=x[0], y=y[b])
+        b+=1
+
         # HAVE PRE TRAINED MODELS HERE!!!
+
+        self.widgets.append(self.loadButton2)
         self.createSpitWidgets(x, y, b)
 
     def createModelSelection(self, x, y, b):
@@ -285,12 +292,9 @@ class Gui(tk.Frame):
         self.refresh()
         print(self.fire)
 
-    def save_fire(self):
+    #LOAD PRE TRAINED MODEL
+    def load_trained_model(self):
         None
-
-    def save_model(self):
-        None
-
 
     def refresh(self):
         for i in range(len(self.widgets)):
