@@ -64,7 +64,7 @@ class Gui(tk.Frame):
             self.feedbackLabel["text"] = "Welcome?"
             self.feedbackLabel.place(x=x[4], y=y[b])
 
-            self.outputWindow = tk.Text(self, width=50, height=20, wrap=tk.WORD)
+            self.outputWindow = tk.Text(self, width=50, height=20, wrap=tk.WORD, state="disabled")
             self.outputWindow.place(x=x[3], y=y[b+1])
         b +=1
 
@@ -264,7 +264,10 @@ class Gui(tk.Frame):
 
     def spit_gui(self):
         self.fire = self.cranium.spit(temp=float(self.tempEntry.get()))
+        self.outputWindow.config(state="normal")
+        self.outputWindow.delete("1.0", tk.END)
         self.outputWindow.insert(tk.END, self.fire)
+        self.outputWindow.config(state="disabled")
         print(self.fire)
 
     def save_fire(self):
