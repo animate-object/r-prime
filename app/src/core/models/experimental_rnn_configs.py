@@ -42,3 +42,12 @@ class PizzaDoughRnn(ConfigurableLstmRnn):
         super().__init__(char_idx, seq_max_len, checkpoint_path, default_seed,
                         hidden_layer_sizes=[],
                         final_layer_size=2048)
+
+class EmptyRnn(ConfigurableLstmRnn):
+    """
+    Empty Rnn with no values set
+    """
+    def __init__(self, char_idx, seq_max_len=25, checkpoint_path=None, default_seed=None):
+            super().__init__(char_idx, seq_max_len, checkpoint_path, default_seed,
+                             hidden_layer_sizes=[],
+                             final_layer_size=1)

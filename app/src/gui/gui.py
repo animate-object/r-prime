@@ -32,6 +32,9 @@ class Gui(tk.Frame):
         self.model_trained = False
         self.fire = None
 
+        self.aPretrainModel = tk.StringVar()
+        self.pretrainModels = []
+
         #This array is for any widget that doesn't have a fixed value
         self.widgets = []
         self.feedback = ["", "", ""]
@@ -64,6 +67,7 @@ class Gui(tk.Frame):
     #Create Initial Widgets that are never deleted and re-created
     def createInitWidgets(self, x, y):
         b = 0
+
         self.startRadioB1 = tk.Radiobutton(self, text="Make model", variable=self.startVar, value=0,
                                            command=self.changeMode)
         self.startRadioB1.place(x=x[1], y=y[b])
@@ -77,13 +81,24 @@ class Gui(tk.Frame):
 
 
     def createPreTrainedModelWidgets(self, x, y, b):
-        self.loadButton2 = tk.Button(self, text="Load", command=self.load_trained_model, width=9)
-        self.loadButton2.place(x=x[0], y=y[b])
         b+=1
 
-        # HAVE PRE TRAINED MODELS HERE!!!
+        self.modelLabelPT = tk.Label(self, text="Select RNN")
+        self.modelLabelPT.place(x=x[0], y=y[b])
 
+        self.loadButton2 = tk.Button(self, text="Load", command=self.load_trained_model, width=9)
+        self.loadButton2.place(x=x[2], y=y[b])
+
+        # HAVE PRE TRAINED MODELS HERE!!!
+        self.get_trained_models()
+        self.aPretrainModel.set(self.pretrainModels[0])
+        self.pretrainOptions = tk.OptionMenu(self, self.aPretrainModel, *self.pretrainModels)
+        self.pretrainOptions.place(x=x[1]-10, y=y[b])
+        b += 1
+
+        self.widgets.append(self.modelLabelPT)
         self.widgets.append(self.loadButton2)
+        self.widgets.append(self.pretrainOptions)
         self.createSpitWidgets(x, y, b)
 
     def createModelSelection(self, x, y, b):
@@ -91,13 +106,13 @@ class Gui(tk.Frame):
         self.modelStrVar.set("LSTM RNN")
         self.optionmenu = tk.OptionMenu(self, self.modelStrVar, *NN_OPTIONS.keys())
         #self.optionmenu["command"] = self.refresh
-        self.optionmenu.place(x=x[2]-10,y=y[b]-2)
+        self.optionmenu.place(x=x[1]-10,y=y[b]-2)
 
         self.modelLabel = tk.Label(self, text="Select RNN")
         self.modelLabel.place(x=x[0], y=y[b])
         #b+=1
         self.loadButton = tk.Button(self, text="Load", command=self.load_model, width=9)
-        self.loadButton.place(x=x[1], y=y[b])
+        self.loadButton.place(x=x[2], y=y[b])
         b+=1
 
         self.widgets.append(self.loadButton)
@@ -199,6 +214,7 @@ class Gui(tk.Frame):
         if (self.select == 0):
             self.giveFeedback("Reset to make model mode")
         else:
+            self.insert_empty_model()
             self.giveFeedback("Reset to use trained model mode")
 
     # Insert Model helper method
@@ -219,6 +235,11 @@ class Gui(tk.Frame):
         print("Model Inserted into Cranium")
         self.giveFeedback("Model Inserted into Cranium")
 
+    def insert_empty_model(self):
+        char_idx={0:0}
+        self.cranium.init_model(EmptyRnn(char_idx))
+        print("Empty RNN Inserted")
+
     def train_model_gui(self):
         print("Starting Train Model")
         self.giveFeedback("Starting Train Model")
@@ -236,7 +257,6 @@ class Gui(tk.Frame):
         self.giveFeedback("Model Trained")
 
     # Helper Method for train_model
-    # TODO file_path
     def _build_feed(self, a_data_dir):
         self.feed = SongFeed.from_lyrics_directory(os.path.join(
             LYRICS_SETS, a_data_dir
@@ -310,8 +330,31 @@ class Gui(tk.Frame):
 
 
     #LOAD PRE TRAINED MODEL
-    def load_trained_model(self):
-        None
+    def load_trained_model(self, nn_dir=None):
+        nn_dir = self.aPretrainModel.get()
+        print(nn_dir)
+        pretrain_path = os.path.join(DATA_DIR, "pre-trained-models\\", nn_dir)
+        trained_path = os.path.join(DATA_DIR, "nn-training-output\\", nn_dir)
+
+        if os.path.isdir(pretrain_path):
+            cp_path=os.path.join(pretrain_path, "checkpoint")
+            print("pretrain path")
+            #self.cranium.load_state(cp_path)
+
+        elif os.path.isdir(trained_path):
+            cp_path = os.path.join(trained_path, "checkpoint")
+            print("trained path")
+            #self.cranium.load_state(cp_path)
+
+        #else:
+            #print("something went wrong")
+
+    def get_trained_models(self):
+        pretrain_path = os.path.join(DATA_DIR,"pre-trained-models\\")
+        trained_path = os.path.join(DATA_DIR,"nn-training-output\\")
+        self.pretrainModels = os.listdir(pretrain_path)
+        for dir in os.listdir(trained_path):
+            self.pretrainModels.append(dir)
 
     def refresh(self):
         for i in range(len(self.widgets)):
