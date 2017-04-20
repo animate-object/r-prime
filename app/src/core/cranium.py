@@ -4,7 +4,12 @@ import inspect
 class Cranium:
     must_implement = {'__init__', 'train', 'spit', 'get_state', 'load_state'}
 
-    def __init__(self, model):
+    def __init__(self, new_model=None):
+        self.model = None
+        if new_model:
+            self.init_model(new_model)
+
+    def init_model(self, model):
         self._verify(model)
         self.model = model
 
@@ -14,25 +19,14 @@ class Cranium:
         return self.model.train(data)
 
     def spit(self, include_metadata=False, **kwargs):
-        to_file, path = kwargs.get('to_file'), kwargs.get('file_path')
-        if to_file:
-            if not path:
-                raise TypeError("Cannot write to file. Specify output locale as 'file_path'")
-            else:
-                output = self.model.spit(include_metadata)
-                pass  # TODO implement saving to file.
-
-        else:
-            # write nn output to console
-            print(self.model.spit(include_metadata))
+        return self.model.spit(include_metadata, **kwargs)
 
     def save_state(self, path):
-        state = self.model.get_state()
-        pass  # save state to path
+        self.model.get_state().save(path)
+
 
     def load_state(self, path):
-        state = None  # retrieve this from file at path
-        self.model.load_state(state)
+        self.model.load_state(path)
 
     def _verify(self, model):
         method_tups = inspect.getmembers(model, inspect.ismethod)
