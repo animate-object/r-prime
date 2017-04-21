@@ -1,6 +1,6 @@
 import random
 
-from app.src.repository.words import is_word_query, word_like_query
+from app.src.repository.db_queries import find_word, find_similar_words
 
 
 def remove_nonsense_words(text):
@@ -19,7 +19,7 @@ def remove_nonsense_words_from_line(line):
         is_cap = word[0].isupper()
         word = word.lower()
         # if the word is a nonsense word
-        if not is_word_query(word):
+        if not find_word(word):
             word = find_like_word(word)
         word = word.capitalize() if is_cap else word
         word = left_pad + word + right_pad
@@ -30,8 +30,8 @@ def remove_nonsense_words_from_line(line):
 
 def find_like_word(nonsense_word):
     close_matches = []
-    while not close_matches:
-        close_matches = word_like_query(nonsense_word)
+    while len(close_matches) == 0:
+        close_matches = find_similar_words(nonsense_word)
         nonsense_word = nonsense_word[:-1]
     return random.choice(close_matches)
 

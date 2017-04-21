@@ -18,8 +18,13 @@ class Cranium:
             return self.model.train(data, params)
         return self.model.train(data)
 
-    def spit(self, include_metadata=False, **kwargs):
-        return self.model.spit(include_metadata, **kwargs)
+    def spit(self, include_metadata=False, filter_functions=[], **kwargs):
+        raw_output = self.model.spit(include_metadata, **kwargs)
+        text = raw_output
+        for filter_function in filter_functions:
+            text = filter_function(text)
+        return text
+
 
     def save_state(self, path):
         self.model.get_state().save(path)
