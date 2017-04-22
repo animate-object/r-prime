@@ -6,7 +6,6 @@ import os.path
 from paths import *
 
 from app.src.core.cranium import Cranium
-from app.src.core.models.lstm_rnn import LstmRnn
 from app.src.core.models.experimental_rnn_configs import *
 from app.src.file.song_feed import SongFeed
 
@@ -98,6 +97,7 @@ class Gui(tk.Frame):
         self.loadButton2.place(x=x[2], y=y[b])
 
         # HAVE PRE TRAINED MODELS HERE!!!
+        # TODO fix this, the app shouldn't error out if there are no pre trained models
         self.get_trained_models()
         self.aPretrainModel.set(self.pretrainModels[0])
         self.pretrainOptions = tk.OptionMenu(self, self.aPretrainModel, *self.pretrainModels)
@@ -384,6 +384,11 @@ class Gui(tk.Frame):
     def get_trained_models(self):
         pretrain_path = os.path.join(DATA_DIR,"pre-trained-models\\")
         trained_path = os.path.join(DATA_DIR,"nn-training-output\\")
+        if not os.path.isdir(pretrain_path):
+            os.mkdir(pretrain_path)
+        if not os.path.isdir(trained_path):
+            os.mkdir(trained_path)
+
         self.pretrainModels = os.listdir(pretrain_path)
         for dir in os.listdir(trained_path):
             self.pretrainModels.append(dir)
@@ -468,4 +473,9 @@ class Gui(tk.Frame):
 root = tk.Tk()
 root.geometry("950x500+500+300")
 app = Gui(master=root)
-app.mainloop()
+
+def main():
+    app.mainloop()
+
+if __name__ == '__main__':
+    main()

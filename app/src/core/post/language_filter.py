@@ -1,7 +1,3 @@
-import string
-
-
-
 expletives_full = {
     'ass':'bootay',
     'Ass':'Bootay',
