@@ -1,4 +1,6 @@
 import tkinter as tk
+import tensorflow as tf
+from tkinter import filedialog
 
 import os.path
 from paths import *
@@ -11,7 +13,8 @@ from app.src.file.song_feed import SongFeed
 from app.src.domain.default_char_index import *
 
 
-NN_OPTIONS = {"LSTM RNN":LstmRnn, "Hot Dog RNN":HotDogRnn, "Jumbo Dog RNN":JumboDogRnn, "Hamburger RNN":HamburgerRnn}
+NN_OPTIONS = {"Hot Dog RNN":HotDogRnn, "Jumbo Dog RNN":JumboDogRnn, "Hamburger RNN":HamburgerRnn,
+              "Pancake RNN":PancakeRnn, "Pizza Dough RNN":PizzaDoughRnn}
 
 class Gui(tk.Frame):
     def __init__(self, master=None):
@@ -20,19 +23,32 @@ class Gui(tk.Frame):
         self.pack(fill=tk.BOTH, expand=1)
         self.select = 0
         self.cranium = Cranium()
+
+        #Lyrics Feed
         self.feed = None
-        self.fire = None
-        self.model_inserted = False
         self.startVar = tk.IntVar()
-        #self.modelVar = tk.IntVar()
         self.modelStrVar = tk.StringVar()
-        self.tempVar = tk.DoubleVar()
+        self.trainPath = None
+        self.fileDialogPath = None
+
+        #Filters
+        self.langFilterVar = tk.IntVar()
+        self.engFilterVar = tk.IntVar()
+        self.rhymeFilterVar = tk.IntVar()
+
+        #variables for what's loaded
+        self.model_inserted = False
+        self.model_trained = False
+        self.fire = None
+
+        self.aPretrainModel = tk.StringVar()
+        self.pretrainModels = []
 
         #This array is for any widget that doesn't have a fixed value
         self.widgets = []
-
+        self.feedback = ["", "", ""]
         self.create_widgets()
-
+        self.giveFeedback("Welcome to R-Prime")
 
     def create_widgets(self, initStart=True):
         #Set up
@@ -49,140 +65,129 @@ class Gui(tk.Frame):
         b = 0
         # Row - Make and load radio buttons
         if initStart == True:
-            self.startRadioB1 = tk.Radiobutton(self, text="Make model", variable=self.startVar, value=0, command=self.changeMode)
-            self.startRadioB1.place(x=x[1], y=y[b])
-
-            self.startRadioB2 = tk.Radiobutton(self, text="Use Pre-trained Model", variable=self.startVar, value=1, command=self.changeMode)
-            self.startRadioB2.place(x=x[2], y=y[b])
-
-            self.feedbackLabel = tk.Label(self, text="Welcome to Raptimus Prime!")
-            self.feedbackLabel["text"] = "Welcome?"
-            self.feedbackLabel.place(x=x[4], y=y[b])
-
-            self.outputWindow = tk.Text(self, width=50, height=20, wrap=tk.WORD)
-            self.outputWindow.place(x=x[3], y=y[b+1])
+            self.createInitWidgets(x, y)
         b +=1
 
         if (self.select == 0):
             self.createModelSelection(x, y, b)
         else:
-            self.createEndWidgets(x, y, b)
+            self.createPreTrainedModelWidgets(x, y, b)
 
-    def createBodyWidgets(self, x, y, b):
-        # Row - Load button + Entry
-        #self.loadButton = tk.Button(self, text="Load", command=self.insert_model, width=10)
-        #self.loadButton.place(x=x[0], y=y[b])
-        self.pathEntry = tk.Entry(self, width=25)
-        self.pathEntry.place(x=x[1], y=y[b])
-        b += 1
+    #Create Initial Widgets that are never deleted and re-created
+    def createInitWidgets(self, x, y):
+        b = 0
 
-        self.widgets.append(self.pathEntry)
+        self.startRadioB1 = tk.Radiobutton(self, text="Make model", variable=self.startVar, value=0,
+                                           command=self.changeMode)
+        self.startRadioB1.place(x=x[1], y=y[b])
 
-        if (self.select == 0):
-            self.createModelSelection(x, y, b)
-        else:
-            self.createEndWidgets(x, y, b)
+        self.startRadioB2 = tk.Radiobutton(self, text="Use Pre-trained Model", variable=self.startVar, value=1,
+                                           command=self.changeMode)
+        self.startRadioB2.place(x=x[2], y=y[b])
 
-    ###DONE###
-    def createModelSelection(self, x, y, b):
+        self.outputWindow = tk.Text(self, width=55, height=20, wrap=tk.WORD)
+        self.outputWindow.place(x=x[4], y=y[b + 1])
 
-        self.modelStrVar.set("Choose RNN")
-        self.optionmenu = tk.OptionMenu(self, self.modelStrVar, *NN_OPTIONS.keys())
-        self.optionmenu.place(x=x[1],y=y[b])
-
-        self.modelLabel = tk.Label(self, text="Select a RNN")
-        self.modelLabel.place(x=x[0], y=y[b])
+    def createPreTrainedModelWidgets(self, x, y, b):
         b+=1
-        self.loadButton = tk.Button(self, text="Load", command=self.load_model, width=10)
-        self.loadButton.place(x=x[0], y=y[b])
 
-        """
-        # Row of models
-        self.lstmRnnButton = tk.Radiobutton(self, text="Lstm", variable=self.modelVar, value=0,
-                                           command=self.changeModel)
-        self.lstmRnnButton.place(x=x[1], y=y[b])
-        self.hotDogRnnButton = tk.Radiobutton(self, text="HotDog", variable=self.modelVar, value=1,
-                                             command=self.changeModel)
-        self.hotDogRnnButton.place(x=x[2], y=y[b])
-        self.jumboDogRnnButton = tk.Radiobutton(self, text="JumboDog", variable=self.modelVar, value=2,
-                                               command=self.changeModel)
-        self.jumboDogRnnButton.place(x=x[3], y=y[b])
-        b+= 1
-        # New row of models
-        self.hamburgerRnnButton = tk.Radiobutton(self, text="Hamburger", variable=self.modelVar, value=3,
-                                                command=self.changeModel)
-        self.hamburgerRnnButton.place(x=x[1], y=y[b])
-        self.pancakeRnnButton = tk.Radiobutton(self, text="Pancake", variable=self.modelVar, value=4,
-                                                 command=self.changeModel)
-        self.pancakeRnnButton.place(x=x[2], y=y[b])
-        self.pizzaDoughRnnButton = tk.Radiobutton(self, text="PizzaDough", variable=self.modelVar, value=5,
-                                               command=self.changeModel)
-        self.pizzaDoughRnnButton.place(x=x[3], y=y[b])
+        self.modelLabelPT = tk.Label(self, text="Select RNN")
+        self.modelLabelPT.place(x=x[0], y=y[b])
+
+        self.loadButton2 = tk.Button(self, text="Load", command=self.load_trained_model, width=9)
+        self.loadButton2.place(x=x[2], y=y[b])
+
+        # HAVE PRE TRAINED MODELS HERE!!!
+        self.get_trained_models()
+        self.aPretrainModel.set(self.pretrainModels[0])
+        self.pretrainOptions = tk.OptionMenu(self, self.aPretrainModel, *self.pretrainModels)
+        self.pretrainOptions.place(x=x[1]-10, y=y[b])
         b += 1
-        
-        self.widgets.append(self.modelLabel)
-        self.widgets.append(self.loadButton)
-        self.widgets.append(self.lstmRnnButton)
-        self.widgets.append(self.hotDogRnnButton)
-        self.widgets.append(self.jumboDogRnnButton)
-        self.widgets.append(self.hamburgerRnnButton)
-        self.widgets.append(self.pancakeRnnButton)
-        self.widgets.append(self.pizzaDoughRnnButton)
-        """
+
+        self.widgets.append(self.modelLabelPT)
+        self.widgets.append(self.loadButton2)
+        self.widgets.append(self.pretrainOptions)
+        self.createSpitWidgets(x, y, b)
+
+    def createModelSelection(self, x, y, b):
+        b += 1
+        self.modelStrVar.set("Hot Dog RNN")
+        self.optionmenu = tk.OptionMenu(self, self.modelStrVar, *NN_OPTIONS.keys())
+        #self.optionmenu["command"] = self.refresh
+        self.optionmenu.place(x=x[1]-10,y=y[b]-2)
+
+        self.modelLabel = tk.Label(self, text="Select RNN")
+        self.modelLabel.place(x=x[0], y=y[b])
+        #b+=1
+        self.loadButton = tk.Button(self, text="Load", command=self.load_model, width=9)
+        self.loadButton.place(x=x[2], y=y[b])
+        b+=1
 
         self.widgets.append(self.loadButton)
         self.widgets.append(self.optionmenu)
+        self.widgets.append(self.modelLabel)
         self.createTrainWidgets(x, y, b)
 
     def createTrainWidgets(self, x, y, b):
         # Row - Train button + feedback
         b += 1
-        self.trainButton = tk.Button(self, text="Train", command=self.train_model_gui, width=10)
+        self.trainButton = tk.Button(self, text="Train", command=self.train_model_gui, width=9)
         self.trainButton.place(x=x[0], y=y[b])
         self.epochLabel = tk.Label(self, text = "Epochs to train:")
         self.epochLabel.place(x=x[1], y=y[b])
         self.epochEntry = tk.Entry(self, width= 6)
         self.epochEntry.place(x=x[2], y=y[b])
         b += 1
-        self.saveModelButton = tk.Button(self, text="Save Model", command=self.save_model, width=10)
+        self.saveModelButton = tk.Button(self, text="Save Model", command=self.save_model, width=9)
         self.saveModelButton.place(x=x[0], y=y[b])
-        self.pathLabel = tk.Label(self, text = "Training data path:")
-        self.pathLabel.place(x=x[1], y=y[b])
-        self.pathEntry = tk.Entry(self, width=25)
+
+        #FILE DIALOG
+        self.fdButton = tk.Button(self, text="Choose Folder", command=self.fileDialogOpen)
+        self.fdButton.place(x=x[1], y=y[b])
+
+        self.pathEntry = tk.Entry(self, width=30)
+        self.pathEntry.insert(0, "Choose Path")
         self.pathEntry.place(x=x[2], y=y[b])
         b+= 1
 
-        #self.trainLabel = tk.Label(self)  # , textvariable=StringVar())
-        #self.trainLabel.place(x=x[1], y=y[b])
-        #b += 1
         #Append and continue
-        self.widgets.append(self.pathLabel)
         self.widgets.append(self.pathEntry)
+        self.widgets.append(self.fdButton)
         self.widgets.append(self.saveModelButton)
         self.widgets.append(self.epochLabel)
         self.widgets.append(self.epochEntry)
         self.widgets.append(self.trainButton)
         self.createSpitWidgets(x, y, b)
 
+
     def createSpitWidgets(self, x, y, b):
         # Row - Spit button + feedback
         b += 1
-        self.spitButton = tk.Button(self, text="Spit", command=self.spit_gui, width=10)
+        self.spitButton = tk.Button(self, text="Spit", command=self.spit_gui, width=9)
         self.spitButton.place(x=x[0], y=y[b])
         self.tempLabel = tk.Label(self, text="Temperature:")
         self.tempLabel.place(x=x[1], y=y[b])
         self.tempEntry = tk.Entry(self, width=6)
         self.tempEntry.place(x=x[2], y=y[b])
         b +=1
-        self.saveFireButton = tk.Button(self, text="Save Spit", command=self.save_fire, width=10)
+        self.saveFireButton = tk.Button(self, text="Save Spit", command=self.save_fire, width=9)
         self.saveFireButton.place(x=x[0], y=y[b])
-        #self.tempScale = tk.Scale(self, variable = self.tempVar, from_=0.0, to=1.0, width=25, orient=tk.HORIZONTAL, resolution=0.01)
-        #self.tempScale.place(x=x[2], y=y[b-1])
-        # self.spitLabel = tk.Label(self)
-        # self.spitLabel.place(x=x[1], y=y[b])
         b += 1
 
+        self.langCheckBox = tk.Checkbutton(self, text = "Remove Cursing", variable = self.langFilterVar, \
+                         onvalue = 1, offvalue = 0)
+        self.langCheckBox.place(x=x[3], y=y[b])
+        self.engCheckBox = tk.Checkbutton(self, text = "English", variable = self.engFilterVar, \
+                         onvalue = 1, offvalue = 0)
+        self.engCheckBox.place(x=x[2], y=y[b])
+        self.rhymeFilterBox = tk.Checkbutton(self, text = "Rhyme", variable = self.rhymeFilterVar,\
+                                             onvalue = 1, offvalue = 0)
+        self.rhymeFilterBox.place(x=x[1],y=y[b])
+        b+=1
 
+        self.widgets.append(self.rhymeFilterBox)
+        self.widgets.append(self.langCheckBox)
+        self.widgets.append(self.engCheckBox)
         self.widgets.append(self.tempLabel)
         self.widgets.append(self.tempEntry)
         self.widgets.append(self.spitButton)
@@ -191,11 +196,26 @@ class Gui(tk.Frame):
 
     def createEndWidgets(self, x, y, b):
         # Row - Quit button
+        feedbackX = 0
         self.quit = tk.Button(self, text="QUIT", fg="red",
                               command=root.destroy)
-        self.quit.place(x=x[0], y=y[b+1])
+        self.quit.place(x=x[0], y=y[b])
+        b += 1
+        self.feedbackLabel0 = tk.Label(self, text="")
+        self.feedbackLabel0.place(x=x[feedbackX], y=y[b])
+        b += 1
+        self.feedbackLabel1 = tk.Label(self, text="")
+        self.feedbackLabel1.place(x=x[feedbackX], y=y[b])
+        b += 1
+        self.feedbackLabel2 = tk.Label(self, text="")
+        self.feedbackLabel2.place(x=x[feedbackX], y=y[b])
+        b += 1
         self.widgets.append(self.quit)
-        # self.refresh()
+        self.widgets.append(self.feedbackLabel1)
+        self.widgets.append(self.feedbackLabel2)
+        self.widgets.append(self.feedbackLabel0)
+        self.giveFeedback(-1)
+        self.refresh()
 
     def changeModel(self):
         modelInfo = [
@@ -214,43 +234,67 @@ class Gui(tk.Frame):
         self.select = self.startVar.get()
         self.reset(self.select)
         self.create_widgets(False)
+        if (self.select == 0):
+            self.giveFeedback("Reset to make model mode")
+        else:
+            self.giveFeedback("Reset to use trained model mode")
 
     # Insert Model helper method
     def load_model(self):
+        tf.reset_default_graph()
         self.insert_model(self.modelStrVar.get())
+        self.refresh()
 
     def insert_model(self, choice=None):
 
-        print("Start Insert")
+        self.giveFeedback("Start "+choice+" Insert")
         print(choice)
         char_idx = create_char_index()
         model = NN_OPTIONS[choice]
         self.cranium.init_model(model(char_idx))
-
+        self.model_inserted = True
+        self.model_trained = False
         print("Model Inserted into Cranium")
+        self.giveFeedback("Model Inserted into Cranium")
+
+    def fileDialogOpen(self):
+        self.fileDialogPath = filedialog.askdirectory()
+        self.pathEntrySetText(self.fileDialogPath)
+        print(self.fileDialogPath)
+
+    def pathEntrySetText(self, text):
+        self.pathEntry.delete(0,tk.END)
+        self.pathEntry.insert(0,text)
 
     def train_model_gui(self):
+        tf.reset_default_graph()
         print("Starting Train Model")
+        self.giveFeedback("Starting Train Model")
+        if (self.pathEntry.get() is "" or self.pathEntry.get() is "Choose Path" or self.fileDialogPath is None):
+            self.giveFeedback("No training path, could not train")
+            return
         self._build_feed(self.pathEntry.get())
         X, Y = self.feed.get_seq_data()
         data = {'X':X, 'Y':Y}
-        for iters in range(int(self.epochEntry.get())):
+        for iters in range(self.boundEpoch(self.epochEntry.get())):
             self.cranium.train_model(data, params={'epochs': 1, 'batch_size': 128})
+        self.model_trained = True
+        self.refresh()
         print("Model Trained")
+        self.giveFeedback("Model Trained")
 
     # Helper Method for train_model
-    # TODO file_path
     def _build_feed(self, a_data_dir):
-        self.feed = SongFeed.from_lyrics_directory(os.path.join(
-            LYRICS_SETS, a_data_dir
-        ))
+        self.feed = SongFeed.from_lyrics_directory(self.fileDialogPath)
 
     # Clears widgets to set them up again
     def reset(self, mode=0):
+        tf.reset_default_graph()
         self.cranium = Cranium()
         self.feed = None
         self.fire = None
         self.model_inserted = False
+        self.model_trained = False
 
         for i in range(len(self.widgets)):
             self.widgets[i].destroy()
@@ -258,17 +302,170 @@ class Gui(tk.Frame):
         self.widgets = []
 
     def spit_gui(self):
-        self.fire = self.cranium.spit(temp=float(self.tempEntry.get()))
+        seed = None
+        if self.feed:
+            try:
+                seed = self.feed.seeds[0]
+            except Exception:
+                pass
+
+        self.fire = self.cranium.spit(temp=self.boundTemp(self.tempEntry.get()), seed=seed)
+        self.outputWindow.config(state="normal")
+        self.outputWindow.delete("1.0", tk.END)
         self.outputWindow.insert(tk.END, self.fire)
+        self.outputWindow.config(state="disabled")
+        self.refresh()
         print(self.fire)
 
+
     def save_fire(self):
-        None
+        print("Saving Output")
+        fileExists = True
+        spitSaveNum = 1
+
+        output_path = os.path.join(DATA_DIR, "spit-output\\")
+        if not os.path.isdir(output_path):
+            os.mkdir(output_path)
+
+        while(fileExists):
+            out_file = os.path.join(output_path, "output"+str(spitSaveNum)+".txt")
+            if not os.path.isfile(out_file):
+                with open(out_file,"w") as fo:
+                    fo.write(self.fire)
+                    fileExists = False
+            spitSaveNum+=1
+
+        print("Output Saved")
 
     def save_model(self):
-        None
+        print("Saving Model")
+        modelSaveNum = 1
+        pathExists = True
+        output_path = None
+
+        output_dir = os.path.join(DATA_DIR, "nn-training-output\\")
+        if not os.path.isdir(output_dir):
+            os.mkdir(output_dir)
+
+        while(pathExists):
+            output_path = os.path.join(DATA_DIR, "nn-training-output\\",
+                                       self.modelStrVar.get()+"-"+str(modelSaveNum)+"\\")
+            if not os.path.isdir(output_path):
+                os.mkdir(output_path)
+                pathExists = False
+            modelSaveNum+=1
+
+        print("Saving model to: "+self.modelStrVar.get()+"-"+str(modelSaveNum-1))
+        self.cranium.save_state(output_path)
+        print("Model Saved")
+
+    #LOAD PRE TRAINED MODEL
+    def load_trained_model(self, nn_dir=None):
+        tf.reset_default_graph()
+#        self.cranium = Cranium()
+        nn_dir = self.aPretrainModel.get()
+        print(nn_dir)
+        pretrain_path = os.path.join(DATA_DIR, "pre-trained-models\\", nn_dir)
+        trained_path = os.path.join(DATA_DIR, "nn-training-output\\", nn_dir)
+
+        if os.path.isdir(pretrain_path):
+            cp_path=os.path.join(pretrain_path)
+            print("pretrain path")
+            self.cranium.load_state(cp_path)
+
+        elif os.path.isdir(trained_path):
+            cp_path = os.path.join(trained_path)
+            print("trained path")
+            self.cranium.load_state(cp_path)
+
+        #else:
+            #print("something went wrong")
+
+    def get_trained_models(self):
+        pretrain_path = os.path.join(DATA_DIR,"pre-trained-models\\")
+        trained_path = os.path.join(DATA_DIR,"nn-training-output\\")
+        self.pretrainModels = os.listdir(pretrain_path)
+        for dir in os.listdir(trained_path):
+            self.pretrainModels.append(dir)
+
+    def refresh(self):
+        for i in range(len(self.widgets)):
+            self.widgets[i]["state"] = tk.NORMAL
+
+        self.outputWindow["state"] = tk.DISABLED
+        if self.select == 0:
+
+            if self.fire == None:
+                self.saveFireButton["state"] = tk.DISABLED
+            elif self.model_trained:
+                return
+
+            #Spit widgets
+            if not self.model_trained:
+                self.spitButton["state"] = tk.DISABLED
+                self.tempEntry["state"] = tk.DISABLED
+                self.saveModelButton["state"] = tk.DISABLED
+                if self.fire == None:
+                    self.saveFireButton["state"] = tk.DISABLED
+            else:
+                return
+
+            if not self.model_inserted:
+                self.trainButton["state"] = tk.DISABLED
+                self.pathEntry["state"] = tk.DISABLED
+                self.epochEntry["state"] = tk.DISABLED
+                self.fdButton["state"] = tk.DISABLED
+            else:
+                return
+
+
+            # Load widgets
+            if self.modelStrVar.get() is "Choose RNN":
+                self.loadButton["state"] == tk.DISABLED
+
+        # For pre-trained model
+        else:
+            None #change later
+
+    #===================== methods to stop users from being smartasses (and some other stuff)
+
+    def giveFeedback(self, txt):
+        if txt == -1:
+            self.feedbackLabel0["text"] = self.feedback[0]
+            self.feedbackLabel1["text"] = self.feedback[1]
+            self.feedbackLabel2["text"] = self.feedback[2]
+            return
+        self.feedback.append(txt)
+        self.feedback.pop(0)
+        self.giveFeedback(-1)
+
+    def boundTemp(self, temp):
+        try:
+            temp = float(temp)
+        except ValueError:
+            self.giveFeedback("Not a float. Setting temp to 0.5")
+            return 0.5
+
+        #temp = float(temp)
+
+        if temp <= 0:
+            self.giveFeedback("Float too low, Setting temp to 0.01")
+            return 0.01
+        elif temp > 1:
+            self.giveFeedback("Float too high, Setting temp to 1")
+            return 1
+        return temp
+
+    def boundEpoch(self, epoch):
+        try:
+            epoch = int(epoch)
+            return epoch
+        except ValueError:
+            self.giveFeedback("Not an int. Setting epoch to 1")
+            return 1
+
 
 root = tk.Tk()
-root.geometry("800x400+300+300")
+root.geometry("950x500+500+300")
 app = Gui(master=root)
 app.mainloop()

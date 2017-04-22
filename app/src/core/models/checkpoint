@@ -1,0 +1,2 @@
+model_checkpoint_path: "C:\\Users\\hodge\\Desktop\\r-prime\\app\\src\\core\\models\\model_shakespeare-64"
+all_model_checkpoint_paths: "C:\\Users\\hodge\\Desktop\\r-prime\\app\\src\\core\\models\\model_shakespeare-64"

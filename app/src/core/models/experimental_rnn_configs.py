@@ -23,7 +23,7 @@ class HamburgerRnn(ConfigurableLstmRnn):
     Wide, shallow network.
     """
     def __init__(self, char_idx, seq_max_len=25, checkpoint_path=None, default_seed=None):
-        super().__init__(char_idx, seq_max_len, checkpoint_path, default_seed,
+        super().__init__(char_idx, seq_max_len, checkpoint_path,
                          hidden_layer_sizes=[1024,1024])
 
 
@@ -43,7 +43,8 @@ class PizzaDoughRnn(ConfigurableLstmRnn):
     def __init__(self, char_idx, seq_max_len=25, checkpoint_path=None, default_seed=None):
         super().__init__(char_idx, seq_max_len, checkpoint_path,
                         hidden_layer_sizes=[],
-                        final_layer_size=1024)
+                        final_layer_size=2048)
+
 
 
 class LittleRnn(ConfigurableLstmRnn):
@@ -62,3 +63,4 @@ class SmartRnn(ConfigurableLstmRnn):
     """
     def __init__(self, char_idx, seq_max_len=25, checkpoint_path=None):
         super().__init__(char_idx, seq_max_len, checkpoint_path)
+
