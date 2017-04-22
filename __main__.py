@@ -1,4 +1,4 @@
-from .app.src.gui.RprimeGUI import main as run_gui
+from app.src.gui.gui import main as run_gui
 
 
 def main():

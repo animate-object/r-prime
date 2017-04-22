@@ -9,16 +9,13 @@ repeatedly over the training data in a predictable manner.
 """
 
 import os.path
-import random
-import math
 
 from tflearn.data_utils import string_to_semi_redundant_sequences, random_sequence_from_string
 
-from ..domain.default_char_index import create_char_index
-from ..file.file_utils import read_song, read_strip_newlines
-from ..domain.song import Song
+from app.src.domain.default_char_index import create_char_index
+from app.src.file.file_utils import read_song, read_strip_newlines
+from app.src.domain.song import Song
 
-import string
 
 
 class SongFeed:

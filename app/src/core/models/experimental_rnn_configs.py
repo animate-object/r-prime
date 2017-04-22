@@ -1,4 +1,4 @@
-from ...core.models.configurable_lstm_rnn import ConfigurableLstmRnn
+from app.src.core.models.configurable_lstm_rnn import ConfigurableLstmRnn
 
 
 class HotDogRnn(ConfigurableLstmRnn):
