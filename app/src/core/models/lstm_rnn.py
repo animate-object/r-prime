@@ -1,11 +1,13 @@
 import tflearn
-from paths import DATA_DIR
+
+from app.src.file.song_feed import SongFeed
+from paths import*
 from tflearn import BasicLSTMCell
 import tensorflow as tf
 
 
 class LstmRnn:
-    def __init__(self, max_len, char_idx, checkpoint_path=DATA_DIR+'/models-checkpoint/', default_seed=None):
+    def __init__(self, max_len, char_idx, checkpoint_path=None, default_seed=None):
         g = tflearn.input_data([None, max_len, len(char_idx)])
         g = tflearn.lstm(g, 512, return_seq=True)
         g = tflearn.dropout(g, 0.5)
@@ -55,3 +57,5 @@ class LstmRnn:
 
     def load_state(self, model):
         self.model = model
+songFeed = SongFeed()
+rnn = LstmRnn(50, songFeed.from_lyrics_files(LYRICS_SETS+'/nas-discography/'), DATA_DIR+'/models-checkpoint/',None)
