@@ -14,9 +14,9 @@ import math
 
 from tflearn.data_utils import string_to_semi_redundant_sequences, random_sequence_from_string
 
-from app.src.domain.default_char_index import create_char_index
-from app.src.file.file_utils import read_song
-from app.src.domain.song import Song
+from ..domain.default_char_index import create_char_index
+from ..file.file_utils import read_song, read_strip_newlines
+from ..domain.song import Song
 
 import string
 
@@ -37,7 +37,7 @@ class SongFeed:
         self.seeds = []
 
     @classmethod
-    def from_lyrics_directory(cls, directory_path):
+    def from_lyrics_directory(cls, directory_path, strip_newlines=False):
         """
         Build the song feed from a directory containing raw lyrics text files.
         :param path:
@@ -56,16 +56,16 @@ class SongFeed:
                 .format(directory_path)
             )
 
-        return cls.from_lyrics_files(*paths)
+        return cls.from_lyrics_files(*paths, strip_newlines=strip_newlines)
 
     @classmethod
-    def from_lyrics_files(cls, *paths, num_seeds=10):
+    def from_lyrics_files(cls, *paths, num_seeds=10, strip_newlines=False):
         """
         Read in songs individually from a collection of paths
         :param paths: paths where song data is located
         :return: a SongFeed
         """
-        feed = SongFeed()
+        feed = SongFeed(sequence_function=read_strip_newlines if strip_newlines else read_song)
         collected_songs = []
         for path in paths:
             try:

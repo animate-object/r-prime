@@ -1,7 +1,4 @@
 import tflearn
-from paths import DATA_DIR
-from tflearn import BasicLSTMCell
-import tensorflow as tf
 
 
 class LstmRnn:
@@ -40,11 +37,11 @@ class LstmRnn:
             n_epoch=epochs
         )
 
-    def spit(self, include_meta_data=False, seq_len=200, temp=1.0, seed=None, metaData=None):
+    def spit(self, include_meta_data=False, seq_len=200, temp=1.0, seed=None, meta_data=None):
         seed = seed if seed else self.default_seed
         output = ""
         if include_meta_data:
-            if not metaData:
+            if not meta_data:
                 raise TypeError("model.spit() called with include_meta_data set to True, but no metadata provided")
 
         output += self.model.generate(seq_len, temperature=temp, seq_seed=seed)
