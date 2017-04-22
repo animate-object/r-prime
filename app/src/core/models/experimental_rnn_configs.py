@@ -41,9 +41,20 @@ class PizzaDoughRnn(ConfigurableLstmRnn):
     Very wide, very shallow network.
     """
     def __init__(self, char_idx, seq_max_len=25, checkpoint_path=None, default_seed=None):
-        super().__init__(char_idx, seq_max_len, checkpoint_path, default_seed,
+        super().__init__(char_idx, seq_max_len, checkpoint_path,
                         hidden_layer_sizes=[],
                         final_layer_size=1024)
+
+
+class LittleRnn(ConfigurableLstmRnn):
+    """
+    Very tiny rnn. Trains quickly for testing.
+    """
+    def __init__(self, char_idx, seq_max_len=25, checkpoint_path=None, default_seed=None):
+        super().__init__(char_idx, seq_max_len, checkpoint_path,
+                         hidden_layer_sizes=[],
+                         final_layer_size=64)
+
 
 class SmartRnn(ConfigurableLstmRnn):
     """

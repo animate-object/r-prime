@@ -1,8 +1,13 @@
 import inspect
 
+from app.src.core.models.configurable_lstm_rnn import ConfigurableLstmRnn
+from app.src.domain.default_char_index import create_char_index
+import pickle
+import os.path
+
 
 class Cranium:
-    must_implement = {'__init__', 'train', 'spit', 'get_state', 'load_state'}
+    must_implement = {'__init__', 'train', 'spit', 'get_state', 'load_state', 'get_init_params'}
 
     def __init__(self, new_model=None):
         self.model = None
@@ -25,12 +30,17 @@ class Cranium:
             text = filter_function(text)
         return text
 
-
     def save_state(self, path):
-        self.model.get_state().save(path)
+        params = self.model.get_init_params()
+        self._save_model_init_params(path, params)
+        model_checkpoint = os.path.join(path, 'model.checkpoint')
+        self.model.get_state().save(model_checkpoint)
 
     def load_state(self, path):
-        self.model.load_state(path)
+        params = self._load_model_init_params(path)
+        self.model = ConfigurableLstmRnn(create_char_index(), seq_max_len=25, checkpoint_path=None, **params)
+        model_checkpoint = os.path.join(path, 'model.checkpoint')
+        self.model.load_state(model_checkpoint)
 
     def _verify(self, model):
         method_tups = inspect.getmembers(model, inspect.ismethod)
@@ -45,6 +55,14 @@ class Cranium:
                     type(model), missing_methods
                 )
             )
+
+    def _save_model_init_params(self, path, params):
+        model_config_path = os.path.join(path, 'model.config')
+        pickle.dump(params, open(model_config_path, 'wb'))
+
+    def _load_model_init_params(self, path):
+        model_config_path = os.path.join(path, 'model.config')
+        return pickle.load(open(model_config_path, 'rb'))
 
 # ------------------------------------------------------------------
 # MANUAL TEST FUNCTIONS
