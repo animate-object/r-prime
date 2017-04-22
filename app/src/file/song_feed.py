@@ -9,53 +9,67 @@ repeatedly over the training data in a predictable manner.
 """
 
 import os.path
-from pprint import pprint
+import random
+import math
 
-from app.src.file.file_utils import song_to_character_sequences
-from app.src.domain.song import Song
-from paths import LYRICS_SETS
+from tflearn.data_utils import string_to_semi_redundant_sequences, random_sequence_from_string
+
+from ..domain.default_char_index import create_char_index
+from ..file.file_utils import read_song, read_strip_newlines
+from ..domain.song import Song
 
 import string
 
 
 class SongFeed:
-    def __init__(self, sequence_function=song_to_character_sequences):
+    def __init__(self, sequence_function=read_song):
         self.file_parser_function = sequence_function
-        self.songs = None
+        self.songs = set()
         self.artists = set()
+
+        self.X = None
+        self.Y = None
 
         self.cumulative_character_count = 0
 
         # the cumulative character index of all songs in the data set
-        self.character_index = None
+        self.character_index = create_char_index()
+        self.seeds = []
 
     @classmethod
-    def from_lyrics_directory(cls, directory_path):
+    def from_lyrics_directory(cls, directory_path, strip_newlines=False):
         """
         Build the song feed from a directory containing raw lyrics text files.
         :param path:
         :return: a SongFeed
         """
         if not os.path.isdir(directory_path):
-            raise NotADirectoryError("Directory not found at provided path:\n\t{}".format(directory_path))
+            raise NotADirectoryError(
+                "Cannot create song feed from directory. Directory not found at provided path:\n\t{}"
+                .format(directory_path)
+            )
+
         paths = [entry.path for entry in os.scandir(directory_path)]
         if not paths:
-            raise FileNotFoundError("Provided directory was empty:\n\t{}".format(directory_path))
-        return cls.from_lyrics_files(*paths)
+            raise FileNotFoundError(
+                "Cannot create song feed. Provided directory was empty:\n\t{}"
+                .format(directory_path)
+            )
+
+        return cls.from_lyrics_files(*paths, strip_newlines=strip_newlines)
 
     @classmethod
-    def from_lyrics_files(cls, *paths):
+    def from_lyrics_files(cls, *paths, num_seeds=10, strip_newlines=False):
         """
         Read in songs individually from a collection of paths
         :param paths: paths where song data is located
         :return: a SongFeed
         """
-        feed = SongFeed()
+        feed = SongFeed(sequence_function=read_strip_newlines if strip_newlines else read_song)
         collected_songs = []
-        idx = create_char_index()
         for path in paths:
             try:
-                X, Y, _, meta_data = feed.file_parser_function(path, provided_char_index=idx)
+                text, meta_data = feed.file_parser_function(path)
 
                 # Checking for song meta data... there must be a better way
                 artist = meta_data.pop('ARTIST') if 'ARTIST' in meta_data else None
@@ -65,7 +79,7 @@ class SongFeed:
 
                 collected_songs.append(
                     Song(
-                        X, Y,
+                        text=text,
                         artist=artist,
                         title=title,
                         collaborators=collaborators,
@@ -81,22 +95,22 @@ class SongFeed:
                 print("Skipped missing file")
 
         feed.songs = tuple(sorted(collected_songs, key=lambda x: x.title))
-        feed.character_index = idx
+        complete_text = ""
+
+        for song in feed.songs:
+            complete_text += song.text
+
+        feed._build_sequence_data_from_songs(complete_text)
+        feed._get_seeds(num_seeds, text=complete_text)
+
         return feed
 
-    def get_training_feed(self, iterations=1):
-        assert type(iterations) == int
-        while iterations > 0:
-            for song in self.songs:
-                yield song
-            iterations -= 1
+    def _build_sequence_data_from_songs(self, text):
+        self.X, self.Y, _ = string_to_semi_redundant_sequences(text, 25, char_idx=self.character_index) #FIXME make max len configurable
 
+    def _get_seeds(self, n, text):
+        for _ in range(n):
+            self.seeds.append(random_sequence_from_string(text, 25)) #FIXME make max len configurable
 
-def create_char_index():
-    return {char: i for (i, char) in enumerate(string.printable)}
-
-# # --- manual tests ---
-# sample_path = os.path.join(LYRICS_SETS, "sample-lyric-set")
-# test_feed = SongFeed.from_lyrics_directory(sample_path)
-#
-# print()
+    def get_seq_data(self):
+        return self.X, self.Y

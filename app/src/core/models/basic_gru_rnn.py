@@ -1,20 +1,14 @@
 import tflearn
 
-from app.src.file.song_feed import SongFeed
-from paths import*
-from tflearn import BasicLSTMCell
-import tensorflow as tf
-
-
 
 class LstmRnn:
     def __init__(self, char_idx, seq_max_len=25, checkpoint_path=None, default_seed=None):
         g = tflearn.input_data([None, seq_max_len, len(char_idx)])
-        g = tflearn.lstm(g, 512, return_seq=True)
+        g = tflearn.gru(g, 512, return_seq=True)
         g = tflearn.dropout(g, 0.5)
-        g = tflearn.lstm(g, 512, return_seq=True)
+        g = tflearn.gru(g, 512, return_seq=True)
         g = tflearn.dropout(g, 0.5)
-        g = tflearn.lstm(g, 512)
+        g = tflearn.gru(g, 512)
         g = tflearn.dropout(g, 0.5)
         g = tflearn.fully_connected(g, len(char_idx), activation='softmax')
         g = tflearn.regression(g, optimizer='adam', loss='categorical_crossentropy', learning_rate=0.001)
@@ -27,7 +21,7 @@ class LstmRnn:
 
         self.default_seed = default_seed if default_seed else "life in the hood"
 
-    def train(self, data, params=dict()):
+    def train(self, data, params):
         """
         by default run for one epochs over the training data in batches of 128
         """
@@ -43,11 +37,11 @@ class LstmRnn:
             n_epoch=epochs
         )
 
-    def spit(self, include_meta_data=False, seq_len=200, temp=1.0, seed=None, meta_data=None):
+    def spit(self, include_meta_data=False, seq_len=200, temp=1.0, seed=None, metaData=None):
         seed = seed if seed else self.default_seed
         output = ""
         if include_meta_data:
-            if not meta_data:
+            if not metaData:
                 raise TypeError("model.spit() called with include_meta_data set to True, but no metadata provided")
 
         output += self.model.generate(seq_len, temperature=temp, seq_seed=seed)
@@ -58,5 +52,3 @@ class LstmRnn:
 
     def load_state(self, model):
         self.model = model
-songFeed = SongFeed()
-rnn = LstmRnn(50, songFeed.from_lyrics_files(LYRICS_SETS+'/nas-discography/'), DATA_DIR+'/models-checkpoint/',None)
