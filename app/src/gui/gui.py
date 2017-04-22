@@ -13,7 +13,7 @@ from app.src.file.song_feed import SongFeed
 from app.src.domain.default_char_index import *
 
 
-NN_OPTIONS = {"LSTM RNN":LstmRnn, "Hot Dog RNN":HotDogRnn, "Jumbo Dog RNN":JumboDogRnn, "Hamburger RNN":HamburgerRnn,
+NN_OPTIONS = {"Hot Dog RNN":HotDogRnn, "Jumbo Dog RNN":JumboDogRnn, "Hamburger RNN":HamburgerRnn,
               "Pancake RNN":PancakeRnn, "Pizza Dough RNN":PizzaDoughRnn}
 
 class Gui(tk.Frame):
@@ -111,7 +111,7 @@ class Gui(tk.Frame):
 
     def createModelSelection(self, x, y, b):
         b += 1
-        self.modelStrVar.set("LSTM RNN")
+        self.modelStrVar.set("Hot Dog RNN")
         self.optionmenu = tk.OptionMenu(self, self.modelStrVar, *NN_OPTIONS.keys())
         #self.optionmenu["command"] = self.refresh
         self.optionmenu.place(x=x[1]-10,y=y[b]-2)
@@ -267,6 +267,7 @@ class Gui(tk.Frame):
         self.pathEntry.insert(0,text)
 
     def train_model_gui(self):
+        tf.reset_default_graph()
         print("Starting Train Model")
         self.giveFeedback("Starting Train Model")
         if (self.pathEntry.get() is "" or self.pathEntry.get() is "Choose Path" or self.fileDialogPath is None):
@@ -288,7 +289,8 @@ class Gui(tk.Frame):
 
     # Clears widgets to set them up again
     def reset(self, mode=0):
-        self.cranium = None
+        tf.reset_default_graph()
+        self.cranium = Cranium()
         self.feed = None
         self.fire = None
         self.model_inserted = False
@@ -300,8 +302,14 @@ class Gui(tk.Frame):
         self.widgets = []
 
     def spit_gui(self):
+        seed = None
+        if self.feed:
+            try:
+                seed = self.feed.seeds[0]
+            except Exception:
+                pass
 
-        self.fire = self.cranium.spit(temp=self.boundTemp(self.tempEntry.get()))
+        self.fire = self.cranium.spit(temp=self.boundTemp(self.tempEntry.get()), seed=seed)
         self.outputWindow.config(state="normal")
         self.outputWindow.delete("1.0", tk.END)
         self.outputWindow.insert(tk.END, self.fire)
@@ -353,21 +361,22 @@ class Gui(tk.Frame):
 
     #LOAD PRE TRAINED MODEL
     def load_trained_model(self, nn_dir=None):
-        self.cranium = Cranium()
+        tf.reset_default_graph()
+#        self.cranium = Cranium()
         nn_dir = self.aPretrainModel.get()
         print(nn_dir)
         pretrain_path = os.path.join(DATA_DIR, "pre-trained-models\\", nn_dir)
         trained_path = os.path.join(DATA_DIR, "nn-training-output\\", nn_dir)
 
         if os.path.isdir(pretrain_path):
-            cp_path=os.path.join(pretrain_path, "checkpoint")
+            cp_path=os.path.join(pretrain_path)
             print("pretrain path")
-            #self.cranium.load_state(cp_path)
+            self.cranium.load_state(cp_path)
 
         elif os.path.isdir(trained_path):
-            cp_path = os.path.join(trained_path, "checkpoint")
+            cp_path = os.path.join(trained_path)
             print("trained path")
-            #self.cranium.load_state(cp_path)
+            self.cranium.load_state(cp_path)
 
         #else:
             #print("something went wrong")
