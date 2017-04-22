@@ -1,5 +1,6 @@
 import tkinter as tk
 import tensorflow as tf
+from tkinter import filedialog
 
 import os.path
 from paths import *
@@ -22,10 +23,18 @@ class Gui(tk.Frame):
         self.pack(fill=tk.BOTH, expand=1)
         self.select = 0
         self.cranium = Cranium()
+
+        #Lyrics Feed
         self.feed = None
         self.startVar = tk.IntVar()
         self.modelStrVar = tk.StringVar()
-        self.tempVar = tk.DoubleVar()
+        self.trainPath = None
+        self.fileDialogPath = None
+
+        #Filters
+        self.langFilterVar = tk.IntVar()
+        self.engFilterVar = tk.IntVar()
+        self.rhymeFilterVar = tk.IntVar()
 
         #variables for what's loaded
         self.model_inserted = False
@@ -79,7 +88,6 @@ class Gui(tk.Frame):
         self.outputWindow = tk.Text(self, width=55, height=20, wrap=tk.WORD)
         self.outputWindow.place(x=x[4], y=y[b + 1])
 
-
     def createPreTrainedModelWidgets(self, x, y, b):
         b+=1
 
@@ -132,23 +140,25 @@ class Gui(tk.Frame):
         b += 1
         self.saveModelButton = tk.Button(self, text="Save Model", command=self.save_model, width=9)
         self.saveModelButton.place(x=x[0], y=y[b])
-        self.pathLabel = tk.Label(self, text = "Training data path:")
-        self.pathLabel.place(x=x[1], y=y[b])
-        self.pathEntry = tk.Entry(self, width=15)
+
+        #FILE DIALOG
+        self.fdButton = tk.Button(self, text="Choose Folder", command=self.fileDialogOpen)
+        self.fdButton.place(x=x[1], y=y[b])
+
+        self.pathEntry = tk.Entry(self, width=30)
+        self.pathEntry.insert(0, "Choose Path")
         self.pathEntry.place(x=x[2], y=y[b])
         b+= 1
 
-        #self.trainLabel = tk.Label(self)  # , textvariable=StringVar())
-        #self.trainLabel.place(x=x[1], y=y[b])
-        #b += 1
         #Append and continue
-        self.widgets.append(self.pathLabel)
         self.widgets.append(self.pathEntry)
+        self.widgets.append(self.fdButton)
         self.widgets.append(self.saveModelButton)
         self.widgets.append(self.epochLabel)
         self.widgets.append(self.epochEntry)
         self.widgets.append(self.trainButton)
         self.createSpitWidgets(x, y, b)
+
 
     def createSpitWidgets(self, x, y, b):
         # Row - Spit button + feedback
@@ -164,7 +174,20 @@ class Gui(tk.Frame):
         self.saveFireButton.place(x=x[0], y=y[b])
         b += 1
 
+        self.langCheckBox = tk.Checkbutton(self, text = "Remove Cursing", variable = self.langFilterVar, \
+                         onvalue = 1, offvalue = 0)
+        self.langCheckBox.place(x=x[3], y=y[b])
+        self.engCheckBox = tk.Checkbutton(self, text = "English", variable = self.engFilterVar, \
+                         onvalue = 1, offvalue = 0)
+        self.engCheckBox.place(x=x[2], y=y[b])
+        self.rhymeFilterBox = tk.Checkbutton(self, text = "Rhyme", variable = self.rhymeFilterVar,\
+                                             onvalue = 1, offvalue = 0)
+        self.rhymeFilterBox.place(x=x[1],y=y[b])
+        b+=1
 
+        self.widgets.append(self.rhymeFilterBox)
+        self.widgets.append(self.langCheckBox)
+        self.widgets.append(self.engCheckBox)
         self.widgets.append(self.tempLabel)
         self.widgets.append(self.tempEntry)
         self.widgets.append(self.spitButton)
@@ -214,7 +237,6 @@ class Gui(tk.Frame):
         if (self.select == 0):
             self.giveFeedback("Reset to make model mode")
         else:
-            self.insert_empty_model()
             self.giveFeedback("Reset to use trained model mode")
 
     # Insert Model helper method
@@ -235,15 +257,19 @@ class Gui(tk.Frame):
         print("Model Inserted into Cranium")
         self.giveFeedback("Model Inserted into Cranium")
 
-    def insert_empty_model(self):
-        char_idx={0:0}
-        self.cranium.init_model(EmptyRnn(char_idx))
-        print("Empty RNN Inserted")
+    def fileDialogOpen(self):
+        self.fileDialogPath = filedialog.askdirectory()
+        self.pathEntrySetText(self.fileDialogPath)
+        print(self.fileDialogPath)
+
+    def pathEntrySetText(self, text):
+        self.pathEntry.delete(0,tk.END)
+        self.pathEntry.insert(0,text)
 
     def train_model_gui(self):
         print("Starting Train Model")
         self.giveFeedback("Starting Train Model")
-        if (self.pathEntry.get() is "" or self.pathEntry is None):
+        if (self.pathEntry.get() is "" or self.pathEntry.get() is "Choose Path" or self.fileDialogPath is None):
             self.giveFeedback("No training path, could not train")
             return
         self._build_feed(self.pathEntry.get())
@@ -258,13 +284,11 @@ class Gui(tk.Frame):
 
     # Helper Method for train_model
     def _build_feed(self, a_data_dir):
-        self.feed = SongFeed.from_lyrics_directory(os.path.join(
-            LYRICS_SETS, a_data_dir
-        ))
+        self.feed = SongFeed.from_lyrics_directory(self.fileDialogPath)
 
     # Clears widgets to set them up again
     def reset(self, mode=0):
-        self.cranium = Cranium()
+        self.cranium = None
         self.feed = None
         self.fire = None
         self.model_inserted = False
@@ -327,10 +351,9 @@ class Gui(tk.Frame):
         self.cranium.save_state(output_path)
         print("Model Saved")
 
-
-
     #LOAD PRE TRAINED MODEL
     def load_trained_model(self, nn_dir=None):
+        self.cranium = Cranium()
         nn_dir = self.aPretrainModel.get()
         print(nn_dir)
         pretrain_path = os.path.join(DATA_DIR, "pre-trained-models\\", nn_dir)
@@ -382,8 +405,10 @@ class Gui(tk.Frame):
                 self.trainButton["state"] = tk.DISABLED
                 self.pathEntry["state"] = tk.DISABLED
                 self.epochEntry["state"] = tk.DISABLED
+                self.fdButton["state"] = tk.DISABLED
             else:
                 return
+
 
             # Load widgets
             if self.modelStrVar.get() is "Choose RNN":
@@ -432,6 +457,6 @@ class Gui(tk.Frame):
 
 
 root = tk.Tk()
-root.geometry("950x400+300+300")
+root.geometry("950x500+500+300")
 app = Gui(master=root)
 app.mainloop()
