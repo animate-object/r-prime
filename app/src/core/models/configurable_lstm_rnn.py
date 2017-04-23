@@ -40,10 +40,11 @@ class ConfigurableLstmRnn:
     def get_init_params(self):
         return self.init_params
 
-    def train(self, data, params={}):
+    def train(self, data, params=None):
         """
         by default run for one epochs over the training data in batches of 128
         """
+        params = {} if not params else params
         epochs = 1 if not ("epochs" in params) else params["epochs"]
         batch_size = 128 if not ("batch_size" in params) else params["batch_size"]
 
