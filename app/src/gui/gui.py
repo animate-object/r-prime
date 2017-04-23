@@ -98,9 +98,12 @@ class Gui(tk.Frame):
 
         # HAVE PRE TRAINED MODELS HERE!!!
         # TODO fix this, the app shouldn't error out if there are no pre trained models
-        self.get_trained_models()
-        self.aPretrainModel.set(self.pretrainModels[0])
-        self.pretrainOptions = tk.OptionMenu(self, self.aPretrainModel, *self.pretrainModels)
+        if len(self.pretrainModels) > 0:
+            self.aPretrainModel.set(self.pretrainModels[0])
+            self.pretrainOptions = tk.OptionMenu(self, self.aPretrainModel, *self.pretrainModels)
+        else:
+            self.pretrainOptions = tk.Label(self, text="No Models Available")
+
         self.pretrainOptions.place(x=x[1]-10, y=y[b])
         b += 1
 
