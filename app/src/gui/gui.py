@@ -99,8 +99,12 @@ class Gui(tk.Frame):
         # HAVE PRE TRAINED MODELS HERE!!!
         # TODO fix this, the app shouldn't error out if there are no pre trained models
         self.get_trained_models()
-        self.aPretrainModel.set(self.pretrainModels[0])
-        self.pretrainOptions = tk.OptionMenu(self, self.aPretrainModel, *self.pretrainModels)
+        if len(self.pretrainModels) > 0:
+            self.aPretrainModel.set(self.pretrainModels[0])
+            self.pretrainOptions = tk.OptionMenu(self, self.aPretrainModel, *self.pretrainModels)
+        else:
+            self.pretrainOptions = tk.Label(self, text="No Models Available")
+
         self.pretrainOptions.place(x=x[1]-10, y=y[b])
         b += 1
 
@@ -248,19 +252,17 @@ class Gui(tk.Frame):
     def insert_model(self, choice=None):
 
         self.giveFeedback("Start "+choice+" Insert")
-        print(choice)
         char_idx = create_char_index()
         model = NN_OPTIONS[choice]
         self.cranium.init_model(model(char_idx))
         self.model_inserted = True
         self.model_trained = False
-        print("Model Inserted into Cranium")
         self.giveFeedback("Model Inserted into Cranium")
 
     def fileDialogOpen(self):
         self.fileDialogPath = filedialog.askdirectory()
         self.pathEntrySetText(self.fileDialogPath)
-        print(self.fileDialogPath)
+        self.giveFeedback(self.fileDialogPath)
 
     def pathEntrySetText(self, text):
         self.pathEntry.delete(0,tk.END)
@@ -268,7 +270,6 @@ class Gui(tk.Frame):
 
     def train_model_gui(self):
         tf.reset_default_graph()
-        print("Starting Train Model")
         self.giveFeedback("Starting Train Model")
         if (self.pathEntry.get() is "" or self.pathEntry.get() is "Choose Path" or self.fileDialogPath is None):
             self.giveFeedback("No training path, could not train")
@@ -280,7 +281,6 @@ class Gui(tk.Frame):
             self.cranium.train_model(data, params={'epochs': 1, 'batch_size': 128})
         self.model_trained = True
         self.refresh()
-        print("Model Trained")
         self.giveFeedback("Model Trained")
 
     # Helper Method for train_model
@@ -319,7 +319,7 @@ class Gui(tk.Frame):
 
 
     def save_fire(self):
-        print("Saving Output")
+        self.giveFeedback("Saving Output")
         fileExists = True
         spitSaveNum = 1
 
@@ -335,10 +335,10 @@ class Gui(tk.Frame):
                     fileExists = False
             spitSaveNum+=1
 
-        print("Output Saved")
+        self.giveFeedback("Output Saved")
 
     def save_model(self):
-        print("Saving Model")
+        self.giveFeedback("Saving Model")
         modelSaveNum = 1
         pathExists = True
         output_path = None
@@ -355,31 +355,32 @@ class Gui(tk.Frame):
                 pathExists = False
             modelSaveNum+=1
 
-        print("Saving model to: "+self.modelStrVar.get()+"-"+str(modelSaveNum-1))
+        self.giveFeedback("Saving model to: "+self.modelStrVar.get()+"-"+str(modelSaveNum-1))
         self.cranium.save_state(output_path)
-        print("Model Saved")
+        self.giveFeedback("Model Saved")
 
     #LOAD PRE TRAINED MODEL
     def load_trained_model(self, nn_dir=None):
         tf.reset_default_graph()
 #        self.cranium = Cranium()
         nn_dir = self.aPretrainModel.get()
-        print(nn_dir)
+        self.giveFeedback(nn_dir)
         pretrain_path = os.path.join(DATA_DIR, "pre-trained-models\\", nn_dir)
         trained_path = os.path.join(DATA_DIR, "nn-training-output\\", nn_dir)
 
         if os.path.isdir(pretrain_path):
             cp_path=os.path.join(pretrain_path)
-            print("pretrain path")
+            self.giveFeedback("pretrain path")
             self.cranium.load_state(cp_path)
 
         elif os.path.isdir(trained_path):
             cp_path = os.path.join(trained_path)
-            print("trained path")
+            self.giveFeedback("trained path")
             self.cranium.load_state(cp_path)
 
         #else:
             #print("something went wrong")
+        self.model_trained = True
 
     def get_trained_models(self):
         pretrain_path = os.path.join(DATA_DIR,"pre-trained-models\\")
@@ -423,14 +424,24 @@ class Gui(tk.Frame):
             else:
                 return
 
-
             # Load widgets
             if self.modelStrVar.get() is "Choose RNN":
                 self.loadButton["state"] == tk.DISABLED
 
         # For pre-trained model
-        else:
-            None #change later
+        elif self.select == 1:
+            if self.fire == None:
+                self.saveFireButton["state"] = tk.DISABLED
+            elif self.model_trained:
+                return
+
+            if not self.model_trained:
+                self.spitButton["state"] = tk.DISABLED
+                self.tempEntry["state"] = tk.DISABLED
+                if self.fire == None:
+                    self.saveFireButton["state"] = tk.DISABLED
+            else:
+                return
 
     #===================== methods to stop users from being smartasses (and some other stuff)
 
@@ -440,6 +451,7 @@ class Gui(tk.Frame):
             self.feedbackLabel1["text"] = self.feedback[1]
             self.feedbackLabel2["text"] = self.feedback[2]
             return
+        print(txt)
         self.feedback.append(txt)
         self.feedback.pop(0)
         self.giveFeedback(-1)
