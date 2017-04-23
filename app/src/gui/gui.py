@@ -45,7 +45,7 @@ class Gui(tk.Frame):
 
         #This array is for any widget that doesn't have a fixed value
         self.widgets = []
-        self.feedback = ["", "", ""]
+        self.feedback = ["", "", "", "", ""]
         self.create_widgets()
         self.giveFeedback("Welcome to R-Prime")
 
@@ -114,7 +114,6 @@ class Gui(tk.Frame):
         self.createSpitWidgets(x, y, b)
 
     def createModelSelection(self, x, y, b):
-        b += 1
         self.modelStrVar.set("Hot Dog RNN")
         self.optionmenu = tk.OptionMenu(self, self.modelStrVar, *NN_OPTIONS.keys())
         #self.optionmenu["command"] = self.refresh
@@ -214,10 +213,18 @@ class Gui(tk.Frame):
         self.feedbackLabel2 = tk.Label(self, text="")
         self.feedbackLabel2.place(x=x[feedbackX], y=y[b])
         b += 1
+        self.feedbackLabel3 = tk.Label(self, text="")
+        self.feedbackLabel3.place(x=x[feedbackX], y=y[b])
+        b += 1
+        self.feedbackLabel4 = tk.Label(self, text="")
+        self.feedbackLabel4.place(x=x[feedbackX], y=y[b])
+
         self.widgets.append(self.quit)
         self.widgets.append(self.feedbackLabel1)
         self.widgets.append(self.feedbackLabel2)
         self.widgets.append(self.feedbackLabel0)
+        self.widgets.append(self.feedbackLabel4)
+        self.widgets.append(self.feedbackLabel3)
         self.giveFeedback(-1)
         self.refresh()
 
@@ -450,6 +457,8 @@ class Gui(tk.Frame):
             self.feedbackLabel0["text"] = self.feedback[0]
             self.feedbackLabel1["text"] = self.feedback[1]
             self.feedbackLabel2["text"] = self.feedback[2]
+            self.feedbackLabel3["text"] = self.feedback[3]
+            self.feedbackLabel4["text"] = self.feedback[4]
             return
         print(txt)
         self.feedback.append(txt)
