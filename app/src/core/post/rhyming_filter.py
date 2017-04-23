@@ -23,6 +23,7 @@ def make_it_rhyme(text):
 
     return '\n'.join(ret)
 
+
 def apply_rhyme_scheme_to_stanza(stanza, scheme):
     """
     For our purposes a stanza is a group of up to four lines in which rhyme schemes can be applied
