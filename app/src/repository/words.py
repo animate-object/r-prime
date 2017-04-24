@@ -80,6 +80,3 @@ def db_start_up():
     populate_word_db()
 
 
-# db_start_up()
-
-print(word_like_query('bc'))

@@ -1,7 +1,5 @@
 from app.src.core.cranium import Cranium
-from app.src.core.models.experimental_rnn_configs import HotDogRnn, JumboDogRnn, HamburgerRnn, PancakeRnn, PizzaDoughRnn, \
-    LittleRnn
-
+from app.src.core.models.experimental_rnn_configs import *
 from app.src.file.song_feed import SongFeed
 from paths import LYRICS_SETS, DATA_DIR
 import tensorflow as tf
@@ -18,14 +16,14 @@ tf.reset_default_graph()
 
 input_path = os.path.join(LYRICS_SETS, "beastie-boys")
 output_path = os.path.join(DATA_DIR, "nn-training-output\\")
-output_path = os.path.join(output_path, "pancake-rnn-beastie-boys\\")
+output_path = os.path.join(output_path, "beastie-boys-wide-rnn-1\\")
 
 if not os.path.isdir(output_path):
     os.mkdir(output_path)
 
 feed = SongFeed.from_lyrics_directory(input_path, strip_newlines=True)
 
-m = PancakeRnn(feed.character_index, seq_max_len=25)
+m = HamburgerRnn(feed.character_index, seq_max_len=25)
 c = Cranium(new_model=m)
 
 epochs = 15
@@ -33,7 +31,10 @@ epochs = 15
 X, Y = feed.get_seq_data()
 data = {"X": X, "Y": Y}
 
+c.model.init_params['default_seed'] = feed.seeds[0]
+
 c.train_model(data, params={'epochs': epochs, 'batch_size': 128})
+
 
 
 c.save_state(output_path)

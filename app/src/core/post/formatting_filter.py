@@ -1,4 +1,4 @@
-def format_text(text, max_len=40):
+def format_text(text, max_len=30):
     ret = []
     for line in text.split('\n'):
         if not line:

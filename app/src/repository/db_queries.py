@@ -20,7 +20,7 @@ def find_word(word):
     return result
 
 
-def find_similar_words(non_word, max_results=10, keep_first_letter=True):
+def find_similar_words(non_word, max_results=10, keep_first_letter=False):
     conn = sql.connect(WORD_DB_PATH)
     cursor = conn.cursor()
     if keep_first_letter:
