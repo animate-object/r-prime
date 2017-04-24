@@ -13,7 +13,7 @@ from app.src.domain.default_char_index import *
 
 
 NN_OPTIONS = {"Hot Dog RNN":HotDogRnn, "Jumbo Dog RNN":JumboDogRnn, "Hamburger RNN":HamburgerRnn,
-              "Pancake RNN":PancakeRnn, "Pizza Dough RNN":PizzaDoughRnn}
+              "Pancake RNN":PancakeRnn, "Pizza Dough RNN":PizzaDoughRnn, "Little RNN":LittleRnn}
 
 class Gui(tk.Frame):
     def __init__(self, master=None):
@@ -34,6 +34,7 @@ class Gui(tk.Frame):
         self.langFilterVar = tk.IntVar()
         self.engFilterVar = tk.IntVar()
         self.rhymeFilterVar = tk.IntVar()
+        self.formatFilterVar = tk.IntVar()
 
         #variables for what's loaded
         self.model_inserted = False
@@ -57,7 +58,7 @@ class Gui(tk.Frame):
         self.G = x
         self.H = y
 
-        for i in range(0, 15):
+        for i in range(0, 35):
             y.append(y[i] + 30)
             x.append(x[i] + 110)
 
@@ -173,6 +174,12 @@ class Gui(tk.Frame):
         self.tempEntry = tk.Entry(self, width=6)
         self.tempEntry.place(x=x[2], y=y[b])
         b +=1
+
+        self.seqLenLabel = tk.Label(self, text="Seq Len:")
+        self.seqLenLabel.place(x=x[1], y=y[b])
+        self.seqLenEntry = tk.Entry(self, width=6)
+        self.seqLenEntry.place(x=x[2], y=y[b])
+        b += 1
         self.saveFireButton = tk.Button(self, text="Save Spit", command=self.save_fire, width=9)
         self.saveFireButton.place(x=x[0], y=y[b])
         b += 1
@@ -188,6 +195,14 @@ class Gui(tk.Frame):
         self.rhymeFilterBox.place(x=x[1],y=y[b])
         b+=1
 
+        self.formatFilterBox = tk.Checkbutton(self, text="Format", variable=self.formatFilterVar, \
+                                             onvalue=1, offvalue=0)
+        self.formatFilterBox.place(x=x[1], y=y[b])
+        b += 1
+
+        self.widgets.append(self.seqLenEntry)
+        self.widgets.append(self.seqLenLabel)
+        self.widgets.append(self.formatFilterBox)
         self.widgets.append(self.rhymeFilterBox)
         self.widgets.append(self.langCheckBox)
         self.widgets.append(self.engCheckBox)
@@ -308,6 +323,7 @@ class Gui(tk.Frame):
         self.widgets = []
 
     def spit_gui(self):
+        self.giveFeedback("About to spit fire")
         seed = None
         if self.feed:
             try:
@@ -315,7 +331,10 @@ class Gui(tk.Frame):
             except Exception:
                 pass
 
-        self.fire = self.cranium.spit(temp=self.boundTemp(self.tempEntry.get()), seed=seed)
+        self.fire = self.cranium.spit(temp=self.boundTemp(self.tempEntry.get()), seed=seed,
+                format_filter = self.formatFilterVar.get(), language_filter = self.langFilterVar.get(),
+                english_filter = self.engFilterVar.get(), rhyme_filter = self.rhymeFilterVar.get(),
+                seq_len=self.boundSeqLen(self.seqLenEntry.get()))
         self.outputWindow.config(state="normal")
         self.outputWindow.delete("1.0", tk.END)
         self.outputWindow.insert(tk.END, self.fire)
@@ -488,11 +507,28 @@ class Gui(tk.Frame):
     def boundEpoch(self, epoch):
         try:
             epoch = int(epoch)
-            return epoch
         except ValueError:
             self.giveFeedback("Not an int. Setting epoch to 1")
             return 1
 
+        if epoch < 1:
+            self.giveFeedback("Epoch less than 1. Setting epoch to 1")
+            return 1
+        else:
+            return epoch
+
+    def boundSeqLen(self, seqLen):
+        try:
+            seqLen = int(seqLen)
+        except ValueError:
+            self.giveFeedback("Not an int. Setting seqLen to 200")
+            return 200
+
+        if seqLen < 1:
+            self.giveFeedback("SeqLen less than 1. Setting epoch to 200")
+            return 200
+        else:
+            return seqLen
 
 root = tk.Tk()
 root.geometry("950x500+500+300")
