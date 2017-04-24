@@ -4,15 +4,15 @@ import tflearn
 class ConfigurableLstmRnn:
     def __init__(self, char_idx, seq_max_len=25, checkpoint_path=None, **kwargs):
         self.init_params = kwargs
+        self.char_idx = char_idx
 
         g = self._build_model(seq_max_len, len(char_idx), **kwargs)
-
         self.model = tflearn.SequenceGenerator(
             g, dictionary=char_idx,
             clip_gradients=5.0,
             checkpoint_path=checkpoint_path
         )
-        self.default_seed = 'Life in the hood'
+        self.default_seed = kwargs['default_seed'] if 'default_seed' in kwargs else None
 
     def _build_model(self, seq_max_len, len_char_idx, **kwargs):
         hidden_layer_sizes = kwargs['hidden_layer_sizes'] if 'hidden_layer_sizes' in kwargs else [512, 512]
@@ -44,6 +44,9 @@ class ConfigurableLstmRnn:
         """
         by default run for one epochs over the training data in batches of 128
         """
+        if not self.default_seed:
+            self._retrieve_seed_from_training_data(data['X'][0])
+
         params = {} if not params else params
         epochs = 1 if not ("epochs" in params) else params["epochs"]
         batch_size = 128 if not ("batch_size" in params) else params["batch_size"]
@@ -72,3 +75,15 @@ class ConfigurableLstmRnn:
 
     def load_state(self, path):
         self.model.load(path)
+
+    def _retrieve_seed_from_training_data(self, x_data_point):
+        """
+        This is a hack. Basically it is an easy way to guarantee that any network
+        that is being trained has a seed to work with if none is provided.
+        :param x_data_point: we just need one sequence
+        :return: 
+        """
+        seed_seq = [subarray.tolist().index(True) for subarray in x_data_point]
+        reverse_char_idx = {v:k for k, v in self.char_idx.items()}
+        seed = ''.join([reverse_char_idx[char_i] for char_i in seed_seq])
+        return seed
