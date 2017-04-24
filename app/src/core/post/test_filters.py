@@ -117,15 +117,21 @@ cool from either min in ass to purir, hInd discruvedang
 You can me a high s iffyin't all fhol work
 Then I can't fectin' wemprited
 Drink doend like they ever tinna  ara
-It sne Bygptor where it before resorn
+It sne Bygptor where it before resorng
 A fah,red, wuscn go ssict on thids
 (Hol' up, bitch) sin m
 """
 
+hard_to_format_sample="""
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+"""
 
 
 text = sample_text3
-for filter in ([format_text, remove_nonsense_words, make_it_rhyme, filter_language_strict]):
-    print("applying filter: {}".format(filter.__name__))
-    text=filter.__call__(text)
-print(text)
+# for filter in ([format_text, remove_nonsense_words, make_it_rhyme, filter_language_strict]):
+#     print("applying filter: {}".format(filter.__name__))
+#     text=filter.__call__(text)
+# print(text)
+print(format_text(hard_to_format_sample))
