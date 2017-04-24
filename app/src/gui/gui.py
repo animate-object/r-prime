@@ -85,17 +85,15 @@ class Gui(tk.Frame):
                                            command=self.changeMode)
         self.startRadioB2.place(x=x[1], y=y[b])
 
-        self.outputWindow = tk.Text(self, width=55, height=20, wrap=tk.WORD)
-        self.outputWindow.place(x=x[4], y=y[b + 1])
+        self.outputWindow = tk.Text(self, width=55, height=25, wrap=tk.WORD)
+        self.outputWindow.place(x=(x[4]+15), y=y[b+1])
 
     def createPreTrainedModelWidgets(self, x, y, b):
-        b+=1
-
         self.modelLabelPT = tk.Label(self, text="Select RNN:")
         self.modelLabelPT.place(x=x[0], y=y[b])
 
         self.loadButton2 = tk.Button(self, text="Load", command=self.load_trained_model, width=9)
-        self.loadButton2.place(x=x[2], y=y[b])
+        self.loadButton2.place(x=x[3], y=y[b])
 
         # HAVE PRE TRAINED MODELS HERE!!!
         # TODO fix this, the app shouldn't error out if there are no pre trained models
@@ -135,6 +133,8 @@ class Gui(tk.Frame):
     def createTrainWidgets(self, x, y, b):
         # Row - Train button + feedback
         b += 1
+        self.trainLabel = tk.Label(self, text="Training:")
+        self.trainLabel.place(x=x[0],y=y[b])
         self.trainButton = tk.Button(self, text="Train", command=self.train_model_gui, width=9)
         self.trainButton.place(x=x[1], y=y[b])
         self.epochLabel = tk.Label(self, text = "Epochs to train:")
@@ -149,12 +149,13 @@ class Gui(tk.Frame):
         self.fdButton = tk.Button(self, text="Choose Folder", command=self.fileDialogOpen)
         self.fdButton.place(x=x[2], y=y[b])
 
-        self.pathEntry = tk.Entry(self, width=10)
+        self.pathEntry = tk.Entry(self, width=15)
         self.pathEntry.insert(0, "Choose Path")
         self.pathEntry.place(x=x[3], y=y[b])
         b+= 1
 
         #Append and continue
+        self.widgets.append(self.trainLabel)
         self.widgets.append(self.pathEntry)
         self.widgets.append(self.fdButton)
         self.widgets.append(self.saveModelButton)
@@ -167,6 +168,8 @@ class Gui(tk.Frame):
     def createSpitWidgets(self, x, y, b):
         # Row - Spit button + feedback
         b += 1
+        self.outputLabel = tk.Label(self, text="Output:")
+        self.outputLabel.place(x=x[0], y=y[b])
         self.spitButton = tk.Button(self, text="Spit", command=self.spit_gui, width=9)
         self.spitButton.place(x=x[1], y=y[b])
         self.tempLabel = tk.Label(self, text="Temperature:")
@@ -204,6 +207,7 @@ class Gui(tk.Frame):
         self.rhymeFilterBox.place(x=x[2],y=y[b])
         b+=1
 
+        self.widgets.append(self.outputLabel)
         self.widgets.append(self.filterLabel)
         self.widgets.append(self.seqLenEntry)
         self.widgets.append(self.seqLenLabel)
@@ -408,9 +412,11 @@ class Gui(tk.Frame):
             self.giveFeedback("trained path")
             self.cranium.load_state(cp_path)
 
-        #else:
-            #print("something went wrong")
+        else:
+            self.giveFeedback("something went wrong")
+        self.giveFeedback("Trained Model Loaded")
         self.model_trained = True
+        self.refresh()
 
     def get_trained_models(self):
         pretrain_path = os.path.join(DATA_DIR,"pre-trained-models\\")
@@ -438,11 +444,8 @@ class Gui(tk.Frame):
 
             #Spit widgets
             if not self.model_trained:
-                self.spitButton["state"] = tk.DISABLED
-                self.tempEntry["state"] = tk.DISABLED
                 self.saveModelButton["state"] = tk.DISABLED
-                if self.fire == None:
-                    self.saveFireButton["state"] = tk.DISABLED
+                self.disableSpitWidgets()
             else:
                 return
 
@@ -469,13 +472,23 @@ class Gui(tk.Frame):
             elif self.model_trained:
                 return
 
+
             if not self.model_trained:
-                self.spitButton["state"] = tk.DISABLED
-                self.tempEntry["state"] = tk.DISABLED
-                if self.fire == None:
-                    self.saveFireButton["state"] = tk.DISABLED
+                self.disableSpitWidgets()
             else:
                 return
+
+    #Refresh helper method
+    def disableSpitWidgets(self):
+        self.spitButton["state"] = tk.DISABLED
+        self.tempEntry["state"] = tk.DISABLED
+        self.seqLenEntry["state"] = tk.DISABLED
+        self.formatFilterBox["state"] = tk.DISABLED
+        self.rhymeFilterBox["state"] = tk.DISABLED
+        self.langCheckBox["state"] = tk.DISABLED
+        self.engCheckBox["state"] = tk.DISABLED
+        if self.fire == None:
+            self.saveFireButton["state"] = tk.DISABLED
 
     #===================== methods to stop users from being smartasses (and some other stuff)
 
