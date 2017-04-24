@@ -17,7 +17,8 @@ def remove_nonsense_words_from_line(line, highlight_replaced_words):
     line = line.rstrip('\n').split()
     for word in line:
         left_pad, right_pad, word = _strip_and_save_pad(word)
-        is_cap = word[0].isupper()
+        print(word)
+        is_cap = word[0].isupper() if word else False
         word = word.lower()
         # if the word is a nonsense word
         if not find_word(word):

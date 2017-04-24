@@ -76,6 +76,8 @@ def find_rhymes_v3(word):
     :return:
     """
     word_entry = find_word(word)
+    if not word_entry or len(word_entry) == 0:
+        return []
     ult_rime, pult_rime, apult_rime, syl_count = word_entry[5], word_entry[6], word_entry[7], word_entry[8]
     if apult_rime and syl_count > 2:
         results = find_3_rime_matches(ult_rime, pult_rime, apult_rime)

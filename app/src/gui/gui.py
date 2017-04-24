@@ -13,7 +13,7 @@ from app.src.domain.default_char_index import *
 
 
 NN_OPTIONS = {"Hot Dog RNN":HotDogRnn, "Jumbo Dog RNN":JumboDogRnn, "Hamburger RNN":HamburgerRnn,
-              "Pancake RNN":PancakeRnn, "Pizza Dough RNN":PizzaDoughRnn}
+              "Pancake RNN":PancakeRnn, "Pizza Dough RNN":PizzaDoughRnn, "Little RNN":LittleRnn}
 
 class Gui(tk.Frame):
     def __init__(self, master=None):
@@ -34,6 +34,7 @@ class Gui(tk.Frame):
         self.langFilterVar = tk.IntVar()
         self.engFilterVar = tk.IntVar()
         self.rhymeFilterVar = tk.IntVar()
+        self.formatFilterVar = tk.IntVar()
 
         #variables for what's loaded
         self.model_inserted = False
@@ -45,7 +46,7 @@ class Gui(tk.Frame):
 
         #This array is for any widget that doesn't have a fixed value
         self.widgets = []
-        self.feedback = ["", "", ""]
+        self.feedback = ["", "", "", "", ""]
         self.create_widgets()
         self.giveFeedback("Welcome to R-Prime")
 
@@ -57,7 +58,7 @@ class Gui(tk.Frame):
         self.G = x
         self.H = y
 
-        for i in range(0, 15):
+        for i in range(0, 35):
             y.append(y[i] + 30)
             x.append(x[i] + 110)
 
@@ -78,11 +79,11 @@ class Gui(tk.Frame):
 
         self.startRadioB1 = tk.Radiobutton(self, text="Make model", variable=self.startVar, value=0,
                                            command=self.changeMode)
-        self.startRadioB1.place(x=x[1], y=y[b])
+        self.startRadioB1.place(x=x[0], y=y[b])
 
         self.startRadioB2 = tk.Radiobutton(self, text="Use Pre-trained Model", variable=self.startVar, value=1,
                                            command=self.changeMode)
-        self.startRadioB2.place(x=x[2], y=y[b])
+        self.startRadioB2.place(x=x[1], y=y[b])
 
         self.outputWindow = tk.Text(self, width=55, height=20, wrap=tk.WORD)
         self.outputWindow.place(x=x[4], y=y[b + 1])
@@ -90,7 +91,7 @@ class Gui(tk.Frame):
     def createPreTrainedModelWidgets(self, x, y, b):
         b+=1
 
-        self.modelLabelPT = tk.Label(self, text="Select RNN")
+        self.modelLabelPT = tk.Label(self, text="Select RNN:")
         self.modelLabelPT.place(x=x[0], y=y[b])
 
         self.loadButton2 = tk.Button(self, text="Load", command=self.load_trained_model, width=9)
@@ -99,8 +100,12 @@ class Gui(tk.Frame):
         # HAVE PRE TRAINED MODELS HERE!!!
         # TODO fix this, the app shouldn't error out if there are no pre trained models
         self.get_trained_models()
-        self.aPretrainModel.set(self.pretrainModels[0])
-        self.pretrainOptions = tk.OptionMenu(self, self.aPretrainModel, *self.pretrainModels)
+        if len(self.pretrainModels) > 0:
+            self.aPretrainModel.set(self.pretrainModels[0])
+            self.pretrainOptions = tk.OptionMenu(self, self.aPretrainModel, *self.pretrainModels)
+        else:
+            self.pretrainOptions = tk.Label(self, text="No Models Available")
+
         self.pretrainOptions.place(x=x[1]-10, y=y[b])
         b += 1
 
@@ -110,13 +115,12 @@ class Gui(tk.Frame):
         self.createSpitWidgets(x, y, b)
 
     def createModelSelection(self, x, y, b):
-        b += 1
-        self.modelStrVar.set("Hot Dog RNN")
+        self.modelStrVar.set("Little RNN")
         self.optionmenu = tk.OptionMenu(self, self.modelStrVar, *NN_OPTIONS.keys())
         #self.optionmenu["command"] = self.refresh
         self.optionmenu.place(x=x[1]-10,y=y[b]-2)
 
-        self.modelLabel = tk.Label(self, text="Select RNN")
+        self.modelLabel = tk.Label(self, text="Select RNN:")
         self.modelLabel.place(x=x[0], y=y[b])
         #b+=1
         self.loadButton = tk.Button(self, text="Load", command=self.load_model, width=9)
@@ -132,22 +136,22 @@ class Gui(tk.Frame):
         # Row - Train button + feedback
         b += 1
         self.trainButton = tk.Button(self, text="Train", command=self.train_model_gui, width=9)
-        self.trainButton.place(x=x[0], y=y[b])
+        self.trainButton.place(x=x[1], y=y[b])
         self.epochLabel = tk.Label(self, text = "Epochs to train:")
-        self.epochLabel.place(x=x[1], y=y[b])
+        self.epochLabel.place(x=x[2], y=y[b])
         self.epochEntry = tk.Entry(self, width= 6)
-        self.epochEntry.place(x=x[2], y=y[b])
+        self.epochEntry.place(x=x[3], y=y[b])
         b += 1
         self.saveModelButton = tk.Button(self, text="Save Model", command=self.save_model, width=9)
-        self.saveModelButton.place(x=x[0], y=y[b])
+        self.saveModelButton.place(x=x[1], y=y[b])
 
         #FILE DIALOG
         self.fdButton = tk.Button(self, text="Choose Folder", command=self.fileDialogOpen)
-        self.fdButton.place(x=x[1], y=y[b])
+        self.fdButton.place(x=x[2], y=y[b])
 
-        self.pathEntry = tk.Entry(self, width=30)
+        self.pathEntry = tk.Entry(self, width=10)
         self.pathEntry.insert(0, "Choose Path")
-        self.pathEntry.place(x=x[2], y=y[b])
+        self.pathEntry.place(x=x[3], y=y[b])
         b+= 1
 
         #Append and continue
@@ -164,27 +168,46 @@ class Gui(tk.Frame):
         # Row - Spit button + feedback
         b += 1
         self.spitButton = tk.Button(self, text="Spit", command=self.spit_gui, width=9)
-        self.spitButton.place(x=x[0], y=y[b])
+        self.spitButton.place(x=x[1], y=y[b])
         self.tempLabel = tk.Label(self, text="Temperature:")
-        self.tempLabel.place(x=x[1], y=y[b])
+        self.tempLabel.place(x=x[2], y=y[b])
         self.tempEntry = tk.Entry(self, width=6)
-        self.tempEntry.place(x=x[2], y=y[b])
+        self.tempEntry.place(x=x[3], y=y[b])
         b +=1
-        self.saveFireButton = tk.Button(self, text="Save Spit", command=self.save_fire, width=9)
-        self.saveFireButton.place(x=x[0], y=y[b])
-        b += 1
+        self.seqLenLabel = tk.Label(self, text="Seq Len:")
+        self.seqLenLabel.place(x=x[2], y=y[b])
+        self.seqLenEntry = tk.Entry(self, width=6)
+        self.seqLenEntry.place(x=x[3], y=y[b])
 
-        self.langCheckBox = tk.Checkbutton(self, text = "Remove Cursing", variable = self.langFilterVar, \
-                         onvalue = 1, offvalue = 0)
-        self.langCheckBox.place(x=x[3], y=y[b])
-        self.engCheckBox = tk.Checkbutton(self, text = "English", variable = self.engFilterVar, \
-                         onvalue = 1, offvalue = 0)
+        self.saveFireButton = tk.Button(self, text="Save Spit", command=self.save_fire, width=9)
+        self.saveFireButton.place(x=x[1], y=y[b])
+        b += 1
+        self.filterLabel = tk.Label(self, text="Filters:")
+        self.filterLabel.place(x=x[0], y=y[b])
+
+        self.formatFilterBox = tk.Checkbutton(self, text="Format", variable=self.formatFilterVar, \
+                                              onvalue=1, offvalue=0)
+        self.formatFilterBox.place(x=x[1], y=y[b])
+
+        self.engCheckBox = tk.Checkbutton(self, text="English", variable=self.engFilterVar, \
+                                          onvalue=1, offvalue=0)
         self.engCheckBox.place(x=x[2], y=y[b])
+
+
+        b += 1
+        self.langCheckBox = tk.Checkbutton(self, text="SFW Mode", variable=self.langFilterVar, \
+                                           onvalue=1, offvalue=0)
+        self.langCheckBox.place(x=x[1], y=y[b])
+
         self.rhymeFilterBox = tk.Checkbutton(self, text = "Rhyme", variable = self.rhymeFilterVar,\
                                              onvalue = 1, offvalue = 0)
-        self.rhymeFilterBox.place(x=x[1],y=y[b])
+        self.rhymeFilterBox.place(x=x[2],y=y[b])
         b+=1
 
+        self.widgets.append(self.filterLabel)
+        self.widgets.append(self.seqLenEntry)
+        self.widgets.append(self.seqLenLabel)
+        self.widgets.append(self.formatFilterBox)
         self.widgets.append(self.rhymeFilterBox)
         self.widgets.append(self.langCheckBox)
         self.widgets.append(self.engCheckBox)
@@ -210,10 +233,18 @@ class Gui(tk.Frame):
         self.feedbackLabel2 = tk.Label(self, text="")
         self.feedbackLabel2.place(x=x[feedbackX], y=y[b])
         b += 1
+        self.feedbackLabel3 = tk.Label(self, text="")
+        self.feedbackLabel3.place(x=x[feedbackX], y=y[b])
+        b += 1
+        self.feedbackLabel4 = tk.Label(self, text="")
+        self.feedbackLabel4.place(x=x[feedbackX], y=y[b])
+
         self.widgets.append(self.quit)
         self.widgets.append(self.feedbackLabel1)
         self.widgets.append(self.feedbackLabel2)
         self.widgets.append(self.feedbackLabel0)
+        self.widgets.append(self.feedbackLabel4)
+        self.widgets.append(self.feedbackLabel3)
         self.giveFeedback(-1)
         self.refresh()
 
@@ -248,27 +279,23 @@ class Gui(tk.Frame):
     def insert_model(self, choice=None):
 
         self.giveFeedback("Start "+choice+" Insert")
-        print(choice)
         char_idx = create_char_index()
         model = NN_OPTIONS[choice]
         self.cranium.init_model(model(char_idx))
         self.model_inserted = True
         self.model_trained = False
-        print("Model Inserted into Cranium")
         self.giveFeedback("Model Inserted into Cranium")
 
     def fileDialogOpen(self):
         self.fileDialogPath = filedialog.askdirectory()
         self.pathEntrySetText(self.fileDialogPath)
-        print(self.fileDialogPath)
+        self.giveFeedback(self.fileDialogPath)
 
     def pathEntrySetText(self, text):
         self.pathEntry.delete(0,tk.END)
         self.pathEntry.insert(0,text)
 
     def train_model_gui(self):
-        tf.reset_default_graph()
-        print("Starting Train Model")
         self.giveFeedback("Starting Train Model")
         if (self.pathEntry.get() is "" or self.pathEntry.get() is "Choose Path" or self.fileDialogPath is None):
             self.giveFeedback("No training path, could not train")
@@ -280,7 +307,6 @@ class Gui(tk.Frame):
             self.cranium.train_model(data, params={'epochs': 1, 'batch_size': 128})
         self.model_trained = True
         self.refresh()
-        print("Model Trained")
         self.giveFeedback("Model Trained")
 
     # Helper Method for train_model
@@ -302,6 +328,7 @@ class Gui(tk.Frame):
         self.widgets = []
 
     def spit_gui(self):
+        self.giveFeedback("About to spit fire")
         seed = None
         if self.feed:
             try:
@@ -309,17 +336,20 @@ class Gui(tk.Frame):
             except Exception:
                 pass
 
-        self.fire = self.cranium.spit(temp=self.boundTemp(self.tempEntry.get()), seed=seed)
+        self.fire = self.cranium.spit(temp=self.boundTemp(self.tempEntry.get()), seed=seed,
+                format_filter = self.formatFilterVar.get(), language_filter = self.langFilterVar.get(),
+                english_filter = self.engFilterVar.get(), rhyme_filter = self.rhymeFilterVar.get(),
+                seq_len=self.boundSeqLen(self.seqLenEntry.get()))
         self.outputWindow.config(state="normal")
         self.outputWindow.delete("1.0", tk.END)
         self.outputWindow.insert(tk.END, self.fire)
         self.outputWindow.config(state="disabled")
         self.refresh()
-        print(self.fire)
+        #print(self.fire)
 
 
     def save_fire(self):
-        print("Saving Output")
+        self.giveFeedback("Saving Output")
         fileExists = True
         spitSaveNum = 1
 
@@ -335,10 +365,10 @@ class Gui(tk.Frame):
                     fileExists = False
             spitSaveNum+=1
 
-        print("Output Saved")
+        self.giveFeedback("Output Saved")
 
     def save_model(self):
-        print("Saving Model")
+        self.giveFeedback("Saving Model")
         modelSaveNum = 1
         pathExists = True
         output_path = None
@@ -355,31 +385,32 @@ class Gui(tk.Frame):
                 pathExists = False
             modelSaveNum+=1
 
-        print("Saving model to: "+self.modelStrVar.get()+"-"+str(modelSaveNum-1))
+        self.giveFeedback("Saving model to: "+self.modelStrVar.get()+"-"+str(modelSaveNum-1))
         self.cranium.save_state(output_path)
-        print("Model Saved")
+        self.giveFeedback("Model Saved")
 
     #LOAD PRE TRAINED MODEL
     def load_trained_model(self, nn_dir=None):
         tf.reset_default_graph()
 #        self.cranium = Cranium()
         nn_dir = self.aPretrainModel.get()
-        print(nn_dir)
+        self.giveFeedback(nn_dir)
         pretrain_path = os.path.join(DATA_DIR, "pre-trained-models\\", nn_dir)
         trained_path = os.path.join(DATA_DIR, "nn-training-output\\", nn_dir)
 
         if os.path.isdir(pretrain_path):
             cp_path=os.path.join(pretrain_path)
-            print("pretrain path")
+            self.giveFeedback("pretrain path")
             self.cranium.load_state(cp_path)
 
         elif os.path.isdir(trained_path):
             cp_path = os.path.join(trained_path)
-            print("trained path")
+            self.giveFeedback("trained path")
             self.cranium.load_state(cp_path)
 
         #else:
             #print("something went wrong")
+        self.model_trained = True
 
     def get_trained_models(self):
         pretrain_path = os.path.join(DATA_DIR,"pre-trained-models\\")
@@ -423,14 +454,28 @@ class Gui(tk.Frame):
             else:
                 return
 
-
             # Load widgets
             if self.modelStrVar.get() is "Choose RNN":
                 self.loadButton["state"] == tk.DISABLED
 
         # For pre-trained model
-        else:
-            None #change later
+        elif self.select == 1:
+
+            if not len(self.pretrainModels) > 0:
+                self.loadButton2["state"] = tk.DISABLED
+
+            if self.fire == None:
+                self.saveFireButton["state"] = tk.DISABLED
+            elif self.model_trained:
+                return
+
+            if not self.model_trained:
+                self.spitButton["state"] = tk.DISABLED
+                self.tempEntry["state"] = tk.DISABLED
+                if self.fire == None:
+                    self.saveFireButton["state"] = tk.DISABLED
+            else:
+                return
 
     #===================== methods to stop users from being smartasses (and some other stuff)
 
@@ -439,7 +484,10 @@ class Gui(tk.Frame):
             self.feedbackLabel0["text"] = self.feedback[0]
             self.feedbackLabel1["text"] = self.feedback[1]
             self.feedbackLabel2["text"] = self.feedback[2]
+            self.feedbackLabel3["text"] = self.feedback[3]
+            self.feedbackLabel4["text"] = self.feedback[4]
             return
+        print(txt)
         self.feedback.append(txt)
         self.feedback.pop(0)
         self.giveFeedback(-1)
@@ -464,14 +512,32 @@ class Gui(tk.Frame):
     def boundEpoch(self, epoch):
         try:
             epoch = int(epoch)
-            return epoch
         except ValueError:
             self.giveFeedback("Not an int. Setting epoch to 1")
             return 1
 
+        if epoch < 1:
+            self.giveFeedback("Epoch less than 1. Setting epoch to 1")
+            return 1
+        else:
+            return epoch
+
+    def boundSeqLen(self, seqLen):
+        try:
+            seqLen = int(seqLen)
+        except ValueError:
+            self.giveFeedback("Not an int. Setting seqLen to 200")
+            return 200
+
+        if seqLen < 1:
+            self.giveFeedback("SeqLen less than 1. Setting epoch to 200")
+            return 200
+        else:
+            return seqLen
 
 root = tk.Tk()
 root.geometry("950x500+500+300")
+root.resizable(width=False, height=False)
 app = Gui(master=root)
 
 def main():
