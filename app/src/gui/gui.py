@@ -115,7 +115,7 @@ class Gui(tk.Frame):
         self.createSpitWidgets(x, y, b)
 
     def createModelSelection(self, x, y, b):
-        self.modelStrVar.set("Hot Dog RNN")
+        self.modelStrVar.set("Little RNN")
         self.optionmenu = tk.OptionMenu(self, self.modelStrVar, *NN_OPTIONS.keys())
         #self.optionmenu["command"] = self.refresh
         self.optionmenu.place(x=x[1]-10,y=y[b]-2)
@@ -136,22 +136,22 @@ class Gui(tk.Frame):
         # Row - Train button + feedback
         b += 1
         self.trainButton = tk.Button(self, text="Train", command=self.train_model_gui, width=9)
-        self.trainButton.place(x=x[0], y=y[b])
+        self.trainButton.place(x=x[1], y=y[b])
         self.epochLabel = tk.Label(self, text = "Epochs to train:")
-        self.epochLabel.place(x=x[1], y=y[b])
+        self.epochLabel.place(x=x[2], y=y[b])
         self.epochEntry = tk.Entry(self, width= 6)
-        self.epochEntry.place(x=x[2], y=y[b])
+        self.epochEntry.place(x=x[3], y=y[b])
         b += 1
         self.saveModelButton = tk.Button(self, text="Save Model", command=self.save_model, width=9)
-        self.saveModelButton.place(x=x[0], y=y[b])
+        self.saveModelButton.place(x=x[1], y=y[b])
 
         #FILE DIALOG
         self.fdButton = tk.Button(self, text="Choose Folder", command=self.fileDialogOpen)
-        self.fdButton.place(x=x[1], y=y[b])
+        self.fdButton.place(x=x[2], y=y[b])
 
-        self.pathEntry = tk.Entry(self, width=30)
+        self.pathEntry = tk.Entry(self, width=10)
         self.pathEntry.insert(0, "Choose Path")
-        self.pathEntry.place(x=x[2], y=y[b])
+        self.pathEntry.place(x=x[3], y=y[b])
         b+= 1
 
         #Append and continue
@@ -168,38 +168,43 @@ class Gui(tk.Frame):
         # Row - Spit button + feedback
         b += 1
         self.spitButton = tk.Button(self, text="Spit", command=self.spit_gui, width=9)
-        self.spitButton.place(x=x[0], y=y[b])
+        self.spitButton.place(x=x[1], y=y[b])
         self.tempLabel = tk.Label(self, text="Temperature:")
-        self.tempLabel.place(x=x[1], y=y[b])
+        self.tempLabel.place(x=x[2], y=y[b])
         self.tempEntry = tk.Entry(self, width=6)
-        self.tempEntry.place(x=x[2], y=y[b])
+        self.tempEntry.place(x=x[3], y=y[b])
         b +=1
-
         self.seqLenLabel = tk.Label(self, text="Seq Len:")
-        self.seqLenLabel.place(x=x[1], y=y[b])
+        self.seqLenLabel.place(x=x[2], y=y[b])
         self.seqLenEntry = tk.Entry(self, width=6)
-        self.seqLenEntry.place(x=x[2], y=y[b])
-        b += 1
-        self.saveFireButton = tk.Button(self, text="Save Spit", command=self.save_fire, width=9)
-        self.saveFireButton.place(x=x[0], y=y[b])
-        b += 1
+        self.seqLenEntry.place(x=x[3], y=y[b])
 
-        self.langCheckBox = tk.Checkbutton(self, text = "Remove Cursing", variable = self.langFilterVar, \
-                         onvalue = 1, offvalue = 0)
-        self.langCheckBox.place(x=x[3], y=y[b])
-        self.engCheckBox = tk.Checkbutton(self, text = "English", variable = self.engFilterVar, \
-                         onvalue = 1, offvalue = 0)
-        self.engCheckBox.place(x=x[2], y=y[b])
-        self.rhymeFilterBox = tk.Checkbutton(self, text = "Rhyme", variable = self.rhymeFilterVar,\
-                                             onvalue = 1, offvalue = 0)
-        self.rhymeFilterBox.place(x=x[1],y=y[b])
-        b+=1
+        self.saveFireButton = tk.Button(self, text="Save Spit", command=self.save_fire, width=9)
+        self.saveFireButton.place(x=x[1], y=y[b])
+        b += 1
+        self.filterLabel = tk.Label(self, text="Filters:")
+        self.filterLabel.place(x=x[0], y=y[b])
 
         self.formatFilterBox = tk.Checkbutton(self, text="Format", variable=self.formatFilterVar, \
-                                             onvalue=1, offvalue=0)
+                                              onvalue=1, offvalue=0)
         self.formatFilterBox.place(x=x[1], y=y[b])
-        b += 1
 
+        self.engCheckBox = tk.Checkbutton(self, text="English", variable=self.engFilterVar, \
+                                          onvalue=1, offvalue=0)
+        self.engCheckBox.place(x=x[2], y=y[b])
+
+
+        b += 1
+        self.langCheckBox = tk.Checkbutton(self, text="SFW Mode", variable=self.langFilterVar, \
+                                           onvalue=1, offvalue=0)
+        self.langCheckBox.place(x=x[1], y=y[b])
+
+        self.rhymeFilterBox = tk.Checkbutton(self, text = "Rhyme", variable = self.rhymeFilterVar,\
+                                             onvalue = 1, offvalue = 0)
+        self.rhymeFilterBox.place(x=x[2],y=y[b])
+        b+=1
+
+        self.widgets.append(self.filterLabel)
         self.widgets.append(self.seqLenEntry)
         self.widgets.append(self.seqLenLabel)
         self.widgets.append(self.formatFilterBox)
@@ -340,7 +345,7 @@ class Gui(tk.Frame):
         self.outputWindow.insert(tk.END, self.fire)
         self.outputWindow.config(state="disabled")
         self.refresh()
-        print(self.fire)
+        #print(self.fire)
 
 
     def save_fire(self):
@@ -532,6 +537,7 @@ class Gui(tk.Frame):
 
 root = tk.Tk()
 root.geometry("950x500+500+300")
+root.resizable(width=False, height=False)
 app = Gui(master=root)
 
 def main():
