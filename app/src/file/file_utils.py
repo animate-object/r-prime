@@ -11,7 +11,7 @@ def read_song(path, strip_newlines=False):
     """
     song_text = ""
     metadata = {}
-    with open(path, 'r') as song_in:
+    with open(path, 'r', encoding='utf-8') as song_in:
         for line in song_in:
             if line.startswith("#"):
                 continue

@@ -1,17 +1,18 @@
 import random
 
+from app.src.core.post.filter_utils import _strip_and_save_pad
 from app.src.repository.db_queries import find_word, find_similar_words
 
 
-def remove_nonsense_words(text):
+def remove_nonsense_words(text, highlight_replacements=False):
     output = ''
     for line in text.split('\n'):
-        line = remove_nonsense_words_from_line(line)
+        line = remove_nonsense_words_from_line(line, highlight_replacements)
         output += line
     return output
 
 
-def remove_nonsense_words_from_line(line):
+def remove_nonsense_words_from_line(line, highlight_replaced_words):
     ret = []
     line = line.rstrip('\n').split()
     for word in line:
@@ -21,7 +22,11 @@ def remove_nonsense_words_from_line(line):
         # if the word is a nonsense word
         if not find_word(word):
             word = find_like_word(word)
-        word = word.capitalize() if is_cap else word
+            word = word.capitalize() if is_cap else word
+            if highlight_replaced_words:
+                word = "<" + word + ">"
+        else:
+            word = word.capitalize() if is_cap else word
         word = left_pad + word + right_pad
 
         ret.append(word)
@@ -36,41 +41,5 @@ def find_like_word(nonsense_word):
     return random.choice(close_matches)
 
 
-def _strip_and_save_pad(word):
-    word, r_pad = _strip_and_return_punctuation(word, right=True)
-    word, l_pad = _strip_and_return_punctuation(word, right=False)
-    return l_pad, r_pad, word
-
-
-def _strip_and_return_punctuation(word, right=True, punctuation=None):
-    """
-    strip punctuation and return stripped string
-    :param word:
-    :return:
-    """
-    default_punctuation = '".,!;)]' if right else '".,!(['
-    punctuation = punctuation if punctuation else default_punctuation
-    stripped = ''
-    word = reverse_word(word) if right else word
-    for c in word:
-        if c in punctuation:
-            stripped += c
-            word = word[1:]
-        else:
-            break
-    word = reverse_word(word) if right else word
-    stripped = reverse_word(stripped) if right else stripped
-    return word, stripped
-
-
-def reverse_word(word):
-    return word[::-1]
-
 # TEST
-sample_word = '"You."'
 
-sample_text = """
-"Henlo mah num iz g unit tmo gizzar (bloccc)!"
-"""
-
-print(remove_nonsense_words(sample_text))

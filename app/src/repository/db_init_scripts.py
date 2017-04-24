@@ -7,7 +7,7 @@ from paths import DATA_DIR
 
 WORD_DB_PATH = os.path.join(DATA_DIR, 'words', 'word.db')
 CMU_SRC_PATH = os.path.join(DATA_DIR, 'words', 'cmudict.dict')
-CMU_PHONES = os.path.join(DATA_DIR, 'words', 'cmudict.phones')
+CMU_HIP_HOP = os.path.join(DATA_DIR, 'words', 'cmu_encoded_hip_hop_vocab.dict')
 
 """
 TABLE DEFINITION NOTES
@@ -51,10 +51,10 @@ def init_word_table():
     conn.close()
 
 
-def populate_word_table_with_cmudict_entries():
+def populate_word_table_with_cmudict_entries(src_path):
     conn = sql.connect(WORD_DB_PATH)
     cursor = conn.cursor()
-    with open(CMU_SRC_PATH, 'r') as dict_in:
+    with open(src_path, 'r') as dict_in:
         for line in dict_in:
             if not line.startswith("#"):
                 try:
@@ -162,14 +162,10 @@ def strip_onset(syllable):
         if start_rime >= 0:
             return syllable[start_rime:]
 
-sample_cmu_line1 = "GEOLOGISTS(2)  JH IY0 - AA1 - L AH0 - JH IH0 S S"
-sample_cmu_line2 = "DENIED  D IH0 - N AY1 D"
-sample_cmu_line3 = "MOBILIZATION(2)  M OW2 - B AH0 - L IH0 - Z EY1 - SH AH0 N"
-
-# print(parse_cmu_entry(sample_cmu_line2))
-# print(parse_cmu_entry(sample_cmu_line3))
-
-print(strip_onset('SHAHN'))
-print(strip_onset('NAYD'))
-print(strip_onset('DIH'))
-print(strip_onset('PRIHNS'))
+# sample_cmu_line1 = "GEOLOGISTS(2)  JH IY0 - AA1 - L AH0 - JH IH0 S S"
+# sample_cmu_line2 = "DENIED  D IH0 - N AY1 D"
+# sample_cmu_line3 = "MOBILIZATION(2)  M OW2 - B AH0 - L IH0 - Z EY1 - SH AH0 N"
+#
+# # print(parse_cmu_entry(sample_cmu_line2))
+# # print(parse_cmu_entry(sample_cmu_line3))
+#
