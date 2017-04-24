@@ -1,6 +1,10 @@
 import inspect
 
 from app.src.core.models.configurable_lstm_rnn import ConfigurableLstmRnn
+from app.src.core.post.formatting_filter import format_text
+from app.src.core.post.language_filter import filter_language_strict
+from app.src.core.post.remove_nonsense_words import remove_nonsense_words
+from app.src.core.post.rhyming_filter import make_it_rhyme
 from app.src.domain.default_char_index import create_char_index
 import pickle
 import os.path
@@ -23,11 +27,22 @@ class Cranium:
             return self.model.train(data, params)
         return self.model.train(data)
 
-    def spit(self, include_metadata=False, filter_functions=[], **kwargs):
+    def spit(self, include_metadata=False,
+             format_filter=False, language_filter=False,
+             english_filter=False, rhyme_filter=False, **kwargs):
+
         raw_output = self.model.spit(include_metadata, **kwargs)
         text = raw_output
-        for filter_function in filter_functions:
-            text = filter_function(text)
+
+        if format_filter:
+            text = format_text(text)
+        if english_filter:
+            text = remove_nonsense_words(text)
+        if language_filter:
+            text = filter_language_strict(text)
+        if rhyme_filter:
+            text = make_it_rhyme(text)
+
         return text
 
     def save_state(self, path):
