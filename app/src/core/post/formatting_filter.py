@@ -27,6 +27,9 @@ def _split_lines(line, max_len=20):
             if line[i] == ' ':
                 cut_off = i
                 break
+        else:
+            # if we're just dealing with a string of text
+            cut_off = max_len
         ret_lines.append(line[:cut_off].lstrip())
         line = line[cut_off:]
     return ret_lines
