@@ -228,6 +228,8 @@ class Gui(tk.Frame):
                               command=root.destroy)
         self.quit.place(x=x[0], y=y[b])
         b += 1
+
+        b = 11
         self.feedbackLabel0 = tk.Label(self, text="")
         self.feedbackLabel0.place(x=x[feedbackX], y=y[b])
         b += 1
