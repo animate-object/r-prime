@@ -12,8 +12,9 @@ from app.src.file.song_feed import SongFeed
 from app.src.domain.default_char_index import *
 
 
-NN_OPTIONS = {"Hot Dog RNN":HotDogRnn, "Jumbo Dog RNN":JumboDogRnn, "Hamburger RNN":HamburgerRnn,
-              "Pancake RNN":PancakeRnn, "Pizza Dough RNN":PizzaDoughRnn, "Little RNN":LittleRnn}
+NN_OPTIONS = {"Hot Dog RNN": HotDogRnn, "Jumbo Dog RNN": JumboDogRnn, "Hamburger RNN": HamburgerRnn,
+              "Pancake RNN": PancakeRnn, "Pizza Dough RNN": PizzaDoughRnn, "Little RNN": LittleRnn}
+
 
 class Gui(tk.Frame):
     def __init__(self, master=None):
@@ -95,8 +96,6 @@ class Gui(tk.Frame):
         self.loadButton2 = tk.Button(self, text="Load", command=self.load_trained_model, width=9)
         self.loadButton2.place(x=x[3], y=y[b])
 
-        # HAVE PRE TRAINED MODELS HERE!!!
-        # TODO fix this, the app shouldn't error out if there are no pre trained models
         self.get_trained_models()
         if len(self.pretrainModels) > 0:
             self.aPretrainModel.set(self.pretrainModels[0])
@@ -110,7 +109,9 @@ class Gui(tk.Frame):
         self.widgets.append(self.modelLabelPT)
         self.widgets.append(self.loadButton2)
         self.widgets.append(self.pretrainOptions)
-        self.createSpitWidgets(x, y, b)
+
+        self.createTrainWidgets(x, y, b)
+        #self.createSpitWidgets(x, y, b)
 
     def createModelSelection(self, x, y, b):
         self.modelStrVar.set("Little RNN")
@@ -177,7 +178,7 @@ class Gui(tk.Frame):
         self.tempEntry = tk.Entry(self, width=6)
         self.tempEntry.place(x=x[3], y=y[b])
         b +=1
-        self.seqLenLabel = tk.Label(self, text="Seq Len:")
+        self.seqLenLabel = tk.Label(self, text="Sequence Length:")
         self.seqLenLabel.place(x=x[2], y=y[b])
         self.seqLenEntry = tk.Entry(self, width=6)
         self.seqLenEntry.place(x=x[3], y=y[b])
@@ -398,7 +399,6 @@ class Gui(tk.Frame):
     #LOAD PRE TRAINED MODEL
     def load_trained_model(self, nn_dir=None):
         tf.reset_default_graph()
-#        self.cranium = Cranium()
         nn_dir = self.aPretrainModel.get()
         self.giveFeedback(nn_dir)
         pretrain_path = os.path.join(DATA_DIR, "pre-trained-models\\", nn_dir)
@@ -452,10 +452,7 @@ class Gui(tk.Frame):
                 return
 
             if not self.model_inserted:
-                self.trainButton["state"] = tk.DISABLED
-                self.pathEntry["state"] = tk.DISABLED
-                self.epochEntry["state"] = tk.DISABLED
-                self.fdButton["state"] = tk.DISABLED
+                self.disableTrainingWidgets()
             else:
                 return
 
@@ -477,6 +474,8 @@ class Gui(tk.Frame):
 
             if not self.model_trained:
                 self.disableSpitWidgets()
+                self.disableTrainingWidgets()
+                self.saveModelButton["state"] = tk.DISABLED
             else:
                 return
 
@@ -491,6 +490,14 @@ class Gui(tk.Frame):
         self.engCheckBox["state"] = tk.DISABLED
         if self.fire == None:
             self.saveFireButton["state"] = tk.DISABLED
+
+    #Refresh helper method
+
+    def disableTrainingWidgets(self):
+        self.trainButton["state"] = tk.DISABLED
+        self.pathEntry["state"] = tk.DISABLED
+        self.epochEntry["state"] = tk.DISABLED
+        self.fdButton["state"] = tk.DISABLED
 
     #===================== methods to stop users from being smartasses (and some other stuff)
 
@@ -541,11 +548,11 @@ class Gui(tk.Frame):
         try:
             seqLen = int(seqLen)
         except ValueError:
-            self.giveFeedback("Not an int. Setting seqLen to 200")
+            self.giveFeedback("Not an int. Setting sequence length to 200")
             return 200
 
         if seqLen < 1:
-            self.giveFeedback("SeqLen less than 1. Setting epoch to 200")
+            self.giveFeedback("Sequence length less than 1. Setting sequence length to 200")
             return 200
         else:
             return seqLen

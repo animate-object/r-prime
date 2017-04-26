@@ -1,5 +1,6 @@
 from app.src.core.models.configurable_lstm_rnn import ConfigurableLstmRnn
 
+
 class OriginalRnn(ConfigurableLstmRnn):
     """
     The baseline RNN we based the others on - 3 layers of 512 neurons
@@ -8,6 +9,7 @@ class OriginalRnn(ConfigurableLstmRnn):
         super().__init__(
             char_idx, seq_max_len, checkpoint_path, hidden_layer_sizes=[512, 512], final_layer_size=512
         )
+
 
 class HotDogRnn(ConfigurableLstmRnn):
     """
@@ -23,7 +25,6 @@ class JumboDogRnn(ConfigurableLstmRnn):
     """
     def __init__(self, char_idx, seq_max_len=25, checkpoint_path=None):
         super().__init__(char_idx, seq_max_len, checkpoint_path, hidden_layer_sizes=[512, 512, 512, 512, 512, 512])
-
 
 
 class HamburgerRnn(ConfigurableLstmRnn):
@@ -43,7 +44,6 @@ class PancakeRnn(ConfigurableLstmRnn):
         super().__init__(char_idx, seq_max_len, checkpoint_path, hidden_layer_sizes=[1024])
 
 
-
 class PizzaDoughRnn(ConfigurableLstmRnn):
     """
     Very wide, very shallow network.
@@ -52,7 +52,6 @@ class PizzaDoughRnn(ConfigurableLstmRnn):
         super().__init__(char_idx, seq_max_len, checkpoint_path,
                         hidden_layer_sizes=[],
                         final_layer_size=2048)
-
 
 
 class LittleRnn(ConfigurableLstmRnn):
@@ -64,3 +63,10 @@ class LittleRnn(ConfigurableLstmRnn):
                          hidden_layer_sizes=[],
                          final_layer_size=64)
 
+
+class MiniRnn(ConfigurableLstmRnn):
+    """
+    Let's see if we can get reasonable approximations out of small layers.
+    """
+    def __init__(self, char_idx, seq_max_len=25, checkpoint_path=None):
+        super().__init__(char_idx, seq_max_len, hidden_layer_sizes=[128], final_layer_size=128)

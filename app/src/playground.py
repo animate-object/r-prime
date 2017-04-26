@@ -14,19 +14,19 @@ You could also plug a different model into the cranium, if you wanted to try som
 
 tf.reset_default_graph()
 
-input_path = os.path.join(LYRICS_SETS, "beastie-boys")
+input_path = os.path.join(LYRICS_SETS, "nas-discography")
 output_path = os.path.join(DATA_DIR, "nn-training-output\\")
-output_path = os.path.join(output_path, "beastie-boys-wide-rnn-1\\")
+output_path = os.path.join(output_path, "nas-mini-rnn-1\\")
 
 if not os.path.isdir(output_path):
     os.mkdir(output_path)
 
 feed = SongFeed.from_lyrics_directory(input_path, strip_newlines=True)
 
-m = HamburgerRnn(feed.character_index, seq_max_len=25)
+m = MiniRnn(feed.character_index, seq_max_len=25)
 c = Cranium(new_model=m)
 
-epochs = 15
+epochs = 5
 
 X, Y = feed.get_seq_data()
 data = {"X": X, "Y": Y}
